@@ -1,0 +1,119 @@
+##
+##
+## This is a template lampshow file that we can use to base other shows off of
+##
+#                                   1         2         3           1         2         3           1         2         3
+#           METER       # 1234567890123456789012345678901-1234567890123456789012345678901-1234567890123456789012345678901-
+########################
+# LOWER PF
+########################
+ballSave                | [  ]
+fortressMultiball       | [  ]
+museumMultiball         |   [  ]
+cryoprisonMultiball     |     [  ]
+wastelandMultiball      |       [  ]
+shootAgain              | [  ]
+########################
+# INLANES
+########################
+accessClaw              |           [  ]
+lightQuickFreeze        |           [  ]
+########################
+# CENTER PF
+########################
+freeze4                 |           [  ]
+freeze3                 |           [  ]
+freeze2                 |           [  ]
+freeze1                 |           [  ]
+########################
+# RETINA SCAN
+########################
+retinaScan              |           [  ]
+########################
+# CAR CRASH
+########################
+carCrashTop             |         [  ]
+carCrashCenter          |       [  ]
+carCrashBottom          |     [  ]
+########################
+# STANDUP 1
+########################
+standup1                |             [  ]
+########################
+# LEFT LOOP
+########################
+leftLoopArrow           |               [  ]
+leftLoopJackpot         |             [  ]
+leftLoopExplode         |           [  ]
+startMultiball          |         [  ]
+extraBall               |       [  ]
+########################
+# LEFT RAMP
+########################
+leftRampArrow           |               [  ]
+leftRampJackpot         |             [  ]
+leftRampExplode         |           [  ]
+leftRampCarChase        |         [  ]
+quickFreeze             |       [  ]
+########################
+# STANDUP 2
+########################
+standup2                |              [  ]
+########################
+# CENTER (ACMAG)
+########################
+centerRampMiddle        |                      [  ]
+centerRampOuter         |                      [  ]
+centerRampInner         |                      [  ]
+centerRampArrow         |                    [  ]
+centerRampJackpot       |                  [  ]
+########################
+# UNDERGROUND
+########################
+demoTime                |                   [  ]
+computer                |                 [  ]
+undergroundArrow        |               [  ]
+undergroundJackpot      |             [  ]
+########################
+# SIDE RAMP
+########################
+sideRampJackpot         |             [  ]
+sideRampArrow           |          [  ]
+########################
+# STANDUPS 3 & 4
+########################
+standup3                |           [  ]
+standup4                |         [  ]
+########################
+# RIGHT RAMP
+########################
+superJackpot            |                 [  ]
+rightRampArrow          |               [  ]
+rightRampJackpot        |             [  ]
+rightRampExplode        |           [  ]
+rightRampCarChase       |         [  ]
+clawReady               |       [  ]
+########################
+# STANDUP 5
+########################
+standup5                |                 [  ]
+########################
+# RIGHT LOOP
+########################
+rightLoopArrow          |             [  ]
+rightLoopJackpot        |          [  ]
+rightLoopExplode        |       [  ]
+########################
+# CLAW AWARDS
+########################
+clawCaptureSimon        |                 [  ]
+clawSuperJets           |                 [  ]
+clawPrisonBreak         |                 [  ]
+clawFreeze              |                 [  ]
+clawAcmag               |                 [  ]
+########################
+# ROLLOVERS (POP BUMPER INLANES)
+########################
+middleRollOver          |                 [  ]
+topRollOver             |                 [  ]
+lowerRollOver           |                 [  ]

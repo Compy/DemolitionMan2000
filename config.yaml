@@ -1,0 +1,29 @@
+use_desktop: False
+keyboard_switch_map:
+    # Enter, Up, Down, Exit
+    1: exit
+    2: up
+    3: down
+    4: enter
+    8: leftJet
+    9: rightJet
+    0: bottomJet
+    s: startButton
+    b: ballLaunch
+    d: phantomSwitch
+    z: flipperLwL
+    /: flipperLwR
+    f: rightFreeway
+    n: shooterLane
+    a: coinDoor
+    k: leftOutlane
+    l: leftInlane
+    r: rightInlane
+    p: bottomPopper
+    w: leftRampEnter
+    e: rightSlingshot
+    c: centerRamp
+    q: rightRampEnter
+    t: topPopper
+    y: chaseCar2
+    h: chaseCar1

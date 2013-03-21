@@ -1,0 +1,444 @@
+# P-ROC Game Description file for Williams Indiana Jones
+PRGame:
+    machineType: wpc
+    numBalls: 5
+PRFlippers:
+    - flipperLwR
+    - flipperLwL
+PRBumpers:
+    - leftSlingshot
+    - rightSlingshot
+    - leftJet
+    - rightJet
+    - bottomJet
+PRSwitches:
+     # **** Format ****
+    # name:
+    #   number: <number>
+    #   type: <type>
+    #
+    #   <number> can be: SFx (Flipper switch, labeled Fx in WPC manual
+    #                    SDx (Dedicated switch, labeled SDx in WPC manual
+    #                    Sx  (Matrix switch, labeled x in WPC manual
+    #   <type> can be: 'NO' (normally open.  This is the default; so no need to use this)
+    #    'NC' (normally closed.  Common for optos)
+
+    #Flipper Grounded Swithes
+    flipperLwR:
+        number: SF2
+    flipperLwL:
+        number: SF4
+    flip1:
+        number: SF1
+    flipperUpL:
+        number: SF3
+    flip5:
+        number: SF5
+    rightHandle:
+        number: SF6
+    flip7:
+        number: SF7
+    leftHandle:
+        number: SF8
+
+    #Dedicated Grounded Swtches
+    coinSlot1:
+        number: SD1
+    coinSlot2:
+        number: SD2
+    coinSlot3:
+        number: SD3
+    coinSlot4:
+        number: SD4
+    exit: 
+        number: SD5
+    down: 
+        number: SD6
+    up: 
+        number: SD7
+    enter: 
+        number: SD8
+
+    #Regular Switches
+    ballLaunch:
+        number: S11
+    leftHandleDrop:
+        number: S12
+    startButton:
+        number: S13
+    plumbBobTilt:
+        number: S14
+    leftOutlane:
+        number: S15
+    leftInlane:
+        number: S16
+    rightInlane:
+        number: S17
+    rightOutlane:
+        number: S18
+    slamTilt:
+        number: S21
+    coinDoor:
+        number: S22
+    buyIn:
+        number: S23
+    nu4:
+        number: S24
+    clawPos1:
+        number: S25
+        type: NC
+    clawPos2:
+        number: S26
+        type: NC
+    shooterLane:
+        number: S27
+    nu3:
+        number: S28
+    trough1:
+        number: S31
+        type: NC
+    trough2:
+        number: S32
+        type: NC
+    trough3:
+        number: S33
+        type: NC
+    trough4:
+        number: S34
+        type: NC
+    trough5:
+        number: S35
+        type: NC
+    troughJam:
+        number: S36
+        type: NC
+    nu2:
+        number: S37
+    standUp5:
+        number: S38
+    leftSlingshot:
+        number: S41
+    rightSlingshot:
+        number: S42
+    leftJet:
+        number: S43
+    bottomJet:
+        number: S44
+    rightJet:
+        number: S45
+    rightRampEnter:
+        number: S46
+    rightRampExit:
+        number: S47
+    rightFreeway:
+        number: S48
+    leftRampEnter:
+        number: S51
+    leftRampExit:
+        number: S52
+    centerRamp:
+        number: S53
+    trunkCC:
+        number: S54
+    leftLoop:
+        number: S55
+    standUp2:
+        number: S56
+    standUp3:
+        number: S57
+    standUp4:
+        number: S58
+    sideRampEnter:
+        number: S61
+    sideRampExit:
+        number: S62
+    leftRollOver:
+        number: S63
+    centerRollOver:
+        number: S64
+    rightRollOver:
+        number: S65
+    eject:
+        number: S66
+    elevatorIndex:
+        number: S67
+        type: NC
+    nu1:
+        number: S68
+    chaseCar1:
+        number: S71
+        type: NC
+    chaseCar2:
+        number: S72
+        type: NC
+    topPopper:
+        number: S73
+        type: NC
+    elevatorHold:
+        number: S74
+        type: NC
+    elevatorRamp:
+        number: S75
+    bottomPopper:
+        number: S76
+        type: NC
+    eyeballStandup:
+        number: S77
+    standUp1:
+        number: S78
+    clawCaptureSimon:
+        number: S81
+    clawSuperJets:
+        number: S82
+    clawPrisonBreak:
+        number: S83
+    clawFreeze:
+        number: S84
+    clawAcmag:
+        number: S85
+    upperLeftFlipperGate:
+        number: S86
+    carChaseStandup:
+        number: S87
+    lowerRebound:
+        number: S88
+    # FAKE SWITCHES ##################
+    phantomSwitch:
+        number: S89
+    
+PRCoils:
+    flipperLwRMain:
+        number: FLRM
+    flipperLwRHold:
+        number: FLRH
+    flipperLwLMain:
+        number: FLLM
+    flipperLwLHold:
+        number: C32
+    divertorMain:
+        number: C05
+    divertorHold:
+        number: C15
+    flipperUpLMain:
+        number: FULM
+    flipperUpLHold:
+        number: FULH
+    trough:
+        number: C01
+        pulseTime: 30
+    ballLaunch:
+        number: C03
+        pulseTime: 30
+    topPopper:
+        number: C04
+        pulseTime: 30
+    leftSlingshot:
+        number: C09
+    rightSlingshot:
+        number: C10
+    leftJet:
+        number: C11
+    rightJet:
+        number: C13
+    bottomJet:
+        number: C12
+    eject:
+        number: C14
+    elevatorMotor:
+        number: C18
+    clawLeft:
+        number: C19
+    clawRight:
+        number: C20
+    bottomPopper:
+        number: C02
+    clawMagnet:
+        number: C33
+    # FLASHERS
+    clawFlasher:
+        number: C17
+    jetsFlasher:
+        number: C21
+    sideRampFlasher:
+        number: C22
+    leftRampUpFlasher:
+        number: C23
+    leftRampLwrFlasher:
+        number: C24
+    carChaseCenterFlasher:
+        number: C25
+    carChaseLowerFlasher:
+        number: C26
+    rightRampFlasher:
+        number: C27
+    ejectFlasher:
+        number: C28
+    carChaseUpFlasher:
+        number: C37
+    lowerReboundFlasher:
+        number: C38
+    eyeBallFlasher:
+        number: C39
+    centerRampFlasher:
+        number: C40
+    elevator2Flasher:
+        number: C41
+    elevator1Flasher:
+        number: C42
+    divertorFlasher:
+        number: C43
+    rightRampUpFlasher:
+        number: C44
+
+PRLamps:
+    ballSave:
+        number: L11
+    fortressMultiball:
+        number: L12
+    museumMultiball:
+        number: L13
+    cryoprisonMultiball:
+        number: L14
+    wastelandMultiball:
+        number: L15
+    shootAgain:
+        number: L16
+    accessClaw:
+        number: L17
+    leftRampExplode:
+        number: L18
+    rightRampJackpot:
+        number: L21
+    rightLoopExplode:
+        number: L22
+    lightQuickFreeze:
+        number: L23
+    freeze4:
+        number: L24
+    clawReady:
+        number: L25
+    freeze3:
+        number: L26
+    freeze2:
+        number: L27
+    freeze1:
+        number: L28
+    rightLoopJackpot:
+        number: L31
+    standup5:
+        number: L32
+    rightRampArrow:
+        number: L33
+    leftRampJackpot:
+        number: L34
+    leftLoopJackpot:
+        number: L35
+    carCrashTop:
+        number: L36
+    standup1:
+        number: L37
+    carCrashCenter:
+        number: L38
+    rightRampExplode:
+        number: L41
+    rightRampCarChase:
+        number: L42
+    quickFreeze:
+        number: L43
+    leftRampCarChase:
+        number: L44
+    extraBall:
+        number: L45
+    startMultiball:
+        number: L46
+    carCrashBottom:
+        number: L47
+    leftLoopExplode:
+        number: L48
+    undergroundArrow:
+        number: L51
+    undergroundJackpot:
+        number: L52
+    standup2:
+        number: L53
+    leftRampArrow:
+        number: L54
+    sideRampJackpot:
+        number: L55
+    sideRampArrow:
+        number: L56
+    leftLoopArrow:
+        number: L57
+    centerRampJackpot:
+        number: L58
+    clawCaptureSimon:
+        number: L61
+    clawSuperJets:
+        number: L62
+    clawPrisonBreak:
+        number: L63
+    clawFreeze:
+        number: L64
+    clawAcmag:
+        number: L65
+    middleRollOver:
+        number: L66
+    topRollOver:
+        number: L67
+    lowerRollOver:
+        number: L68
+    superJackpot:
+        number: L71
+    computer:
+        number: L72
+    demoTime:
+        number: L73
+    standup4:
+        number: L76
+    standup3:
+        number: L77
+    retinaScan:
+        number: L78
+    centerRampMiddle:
+        number: L81
+    centerRampOuter:
+        number: L82
+    centerRampInner:
+        number: L83
+    centerRampArrow:
+        number: L84
+    rightLoopArrow:
+        number: L85
+    buyIn:
+        number: L86
+    ballLaunch:
+        number: L87
+    start:
+        number: L88
+    gi01:
+        number: G01
+    gi02:
+        number: G02
+    gi03:
+        number: G03
+    gi04:
+        number: G04
+    gi05:
+        number: G05
+
+PRBallSave:
+    pulseCoils: [leftSlingshot, rightSlingshot, leftJet, rightJet, bottomJet, eject, topPopper, bottomPopper]
+    resetSwitches:
+        leftSlingshot: open
+        rightSlingshot: open
+        leftJet: open
+        rightJet: open
+        bottomJet: open
+        leftOutlane: open
+        leftInlane: open
+        rightInlane: open
+        rightOutlane: open
+    stopSwitches:
+        shooterLane: closed
+        flipperLwL: closed
+        flipperLwR: closed
