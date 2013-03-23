@@ -1,7 +1,8 @@
 #!/bin/bash
 export DISPLAY=:0
 unflip
-sudo python run.py > system.log
+sudo rm -rf system.log
+sudo python run.py
 
 ecode=`cat EXIT_CODE`
 if [ "$ecode" == "-13" ]; then

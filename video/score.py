@@ -3,7 +3,7 @@ from direct.gui.OnscreenText import OnscreenText, TextNode
 from direct.showbase.DirectObject import DirectObject
 from panda3d.core import *
 import sys, imp, os, locale
-from uielements import DMDSpriteFont
+from uielements import DMDSpriteFont, Sprite
 from gamescreen import GameScreen
 from direct.gui.OnscreenImage import OnscreenImage
 import random
@@ -83,6 +83,37 @@ class ScoreScreen(GameScreen):
                                  scale=(0.3,0.3,0.3))                         # Scale it down a bit horizontally and vertically to make it look right
 
         
+        self.mtlM = Sprite(
+                                parent=self.node, 
+                                file_name="assets/sprites/mtl/m/m", 
+                                file_type="png", 
+                                num_frames=33, 
+                                int_padding=4,
+                                scale=(2.5,2.5,2.5),
+                                pos=(6,40,15))
+        self.mtlT = Sprite(
+                                parent=self.node, 
+                                file_name="assets/sprites/mtl/t/t", 
+                                file_type="png", 
+                                num_frames=33, 
+                                int_padding=4,
+                                scale=(2.5,2.5,2.5),
+                                pos=(9,40,15))
+        
+        self.mtlL = Sprite(
+                                parent=self.node, 
+                                file_name="assets/sprites/mtl/l/l", 
+                                file_type="png", 
+                                num_frames=33, 
+                                int_padding=4,
+                                scale=(2.5,2.5,2.5),
+                                pos=(12,40,15))
+        
+        self.hide_m()
+        self.hide_t()
+        self.hide_l()
+        
+        
     def spin_spinner(self):
         blue_side = 3435
         red_side = 3255
@@ -130,6 +161,20 @@ class ScoreScreen(GameScreen):
         self.player_text.hide()
         self.score_text.hide()
         
+    def hide_ball(self):
+        self.ball_text.hide()
+        
+    def show_ball(self):
+        self.ball_text.show()
+        
+    def hide_timer(self):
+        self.timer_text.hide()
+        self.clock.hide()
+        
+    def show_timer(self):
+        self.timer_text.show()
+        self.clock.show()
+        
     def blink_score(self):
         i = Sequence(LerpColorScaleInterval(self.score_text, 0.5, VBase4(0, 0, 1, 1)), 
                      LerpColorScaleInterval(self.score_text, 0.5, VBase4(1, 1, 1, 1))
@@ -167,3 +212,21 @@ class ScoreScreen(GameScreen):
              )
         # Fire off the sequence
         s.start()
+        
+    def show_m(self):
+        self.mtlM.show()
+    
+    def show_t(self):
+        self.mtlT.show()
+    
+    def show_l(self):
+        self.mtlL.show()
+    
+    def hide_m(self):
+        self.mtlM.hide()
+    
+    def hide_t(self):
+        self.mtlT.hide()
+    
+    def hide_l(self):
+        self.mtlL.hide()

@@ -12,6 +12,7 @@ class BaseMode(DMMode):
         self.ignore_switches = {}
         self.ignore_switches['right_ramp'] = False
         self.ignore_switches['left_ramp'] = False
+        self.mtl_shown = False
         
         
     def mode_started(self):
@@ -55,17 +56,19 @@ class BaseMode(DMMode):
         self.screen = base.screenManager.getScreen("score")
         
         base.screenManager.showScreen("score")
+        self.mtl_shown = False
     
     def ball_drained_callback(self):
-        logging.info("Drain callback")
+        if self.game.ball_save.is_active():
+            return
         if self.game.trough.num_balls_in_play == 0:
             # We lost the last ball we had in play, start the bonus
             self.game.enable_flippers(False)
             self.finish_ball()
             self.stop_timer()
             
-        for mode in self.game.modes:
-            mode.ball_drained()
+            for mode in self.game.modes:
+                mode.ball_drained()
             
     def ball_save_callback(self):
         #anim = dmd.Animation().load(game_path+"dmd/eternal_life.dmd")
@@ -96,6 +99,7 @@ class BaseMode(DMMode):
             #start background music
             #print("Debug - Starting General Play Music")
             self.game.sound.play_music('ball_wait_start', -1)
+            #self.game.sound.play_music('chase',-1)
     
     def mode_stopped(self):
 
@@ -160,6 +164,18 @@ class BaseMode(DMMode):
         self.game.sound.play("slingshot")
         self.game.coils.lowerReboundFlasher.pulse(60)
         
+    def sw_flipperLwR_active(self, sw):
+        if not self.mtl_shown: return
+        currentM = self.game.current_player().mlit
+        currentT = self.game.current_player().tlit
+        currentL = self.game.current_player().llit
+        
+        self.game.current_player().mlit = currentL
+        self.game.current_player().tlit = currentM
+        self.game.current_player().llit = currentT
+        
+        self.show_mtl()
+        
     def sw_flipperLwR_closed_for_3s(self, sw):
         if not self.game.status_display_mode.is_started():
             self.game.modes.add(self.game.status_display_mode)
@@ -171,18 +187,21 @@ class BaseMode(DMMode):
             self.game.status_held_flipper = 'L'
             
     def sw_leftJet_active(self, sw):
+        self.show_mtl()
         self.add_acmag_percentage()
         self.game.sound.play("jet")
         self.game.score(510)
         self.pause_timer(3)
         
     def sw_rightJet_active(self, sw):
+        self.show_mtl()
         self.add_acmag_percentage()
         self.game.sound.play("jet")
         self.game.score(510)
         self.pause_timer(3)
         
     def sw_bottomJet_active(self, sw):
+        self.show_mtl()
         self.add_acmag_percentage()
         self.game.sound.play("jet")
         self.game.score(510)
@@ -406,10 +425,54 @@ class BaseMode(DMMode):
                                            callback=self.game.update_lamps
                                            )
         
+    def sw_enter_active(self, sw):
+        self.game.modes.remove(self)
+        self.game.modes.add(self.game.service)
+        
     def do_laser_millions(self):
         self.game.sound.play("zap")
         self.game.score(2000000)
         self.screen.show_laser_millions()
+        
+    def sw_mtlM_active(self, sw):
+        self.game.current_player().mlit = True
+        self.show_mtl()
+        self.game.sound.play("mtl_whoosh")
+    
+    def sw_mtlT_active(self, sw):
+        self.game.current_player().tlit = True
+        self.show_mtl()
+        self.game.sound.play("mtl_whoosh")
+    
+    def sw_mtlL_active(self, sw):
+        self.game.current_player().llit = True
+        self.show_mtl()
+        self.game.sound.play("mtl_whoosh")
+        
+    def show_mtl(self):
+        self.screen.hide_timer()
+        self.screen.hide_ball()
+        self.screen.hide_m()
+        self.screen.hide_t()
+        self.screen.hide_l()
+        if self.game.current_player().mlit:
+            self.screen.show_m()
+        if self.game.current_player().tlit:
+            self.screen.show_t()
+        if self.game.current_player().llit:
+            self.screen.show_l()
+            
+        self.mtl_shown = True
+            
+        self.delay('hide_mtl', event_type=None, delay=5, handler=self.hide_mtl)
+        
+    def hide_mtl(self):
+        self.screen.hide_m()
+        self.screen.hide_t()
+        self.screen.hide_l()
+        self.screen.show_timer()
+        self.screen.show_ball()
+        self.mtl_shown = False
         
     def _dec_global_timer(self):
         self.game.current_player().timer -= 1

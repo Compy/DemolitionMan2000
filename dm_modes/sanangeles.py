@@ -19,6 +19,7 @@ class SanAngelesMode(DMMode):
         
     def mode_started(self):
         self.logger.info("Starting Welcome to San Angeles mode...")
+        self.cancel_all_delayed()
         self.screen = base.screenManager.getScreen("wtsa")
         
         self.game.enable_flippers(False)

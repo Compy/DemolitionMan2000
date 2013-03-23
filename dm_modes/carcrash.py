@@ -14,6 +14,7 @@ class CarCrashMode(DMMode):
         
     def mode_started(self):
         self.logger.info("Starting carcrash mode...")
+        self.cancel_all_delayed()
         # carCrashTop, carCrashCenter, carCrashBottom
         self.update_lamps()
     
@@ -44,7 +45,7 @@ class CarCrashMode(DMMode):
             self.game.current_player().car_crashes += 1
             self.game.score(10000000)
             
-        self.set_lamps()
+        self.update_lamps()
         self.ignore_bottom = True
         self.delay('unignore_bottom_car', event_type=None, delay=3, handler=self.unignore_bottom)
         self.game.sound.play("tires")

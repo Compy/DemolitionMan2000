@@ -250,6 +250,7 @@ class HWGame(BasicPinboxGame):
         self.sound.register_music("gameend", "assets/music/game_end.wav")
         self.sound.register_music("match", "assets/music/match.wav")
         self.sound.register_music("wtsa", "assets/music/wtsa.wav")
+        self.sound.register_music("chase", "assets/music/chase.ogg")
         
         ##
         ## MUSIC

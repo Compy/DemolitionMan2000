@@ -13,9 +13,11 @@ class SkillShotMode(DMMode):
         
     def mode_started(self):
         self.logger.info("Starting skillshot mode...")
+        self.cancel_all_delayed()
         base.screenManager.showScreen("skillshot", False)
         self.skillshot_screen = base.screenManager.getScreen("skillshot")
         self.game.sound.play_music("ball_wait_start",-1)
+        #self.game.sound.play_music("chase",-1)
         base.screenManager.showScreen("score", False)
         self.freeway_hit_yet = False
         

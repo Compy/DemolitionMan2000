@@ -173,6 +173,15 @@ class SkillShotScreen(GameScreen):
         self._awardText.show()
     
     def stop_skillshot_motion(self):
+        
+        self.explosion = Sprite(
+                                parent=self.node, 
+                                file_name="assets/sprites/blue_explosion/blue_explosion_", 
+                                file_type="png", 
+                                num_frames=13, 
+                                int_padding=2,
+                                scale=(5,5,5))
+        
         self.cubeRotation.pause()
         self.cubeMovement.pause()
         self.awardMovement.pause()

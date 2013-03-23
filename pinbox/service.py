@@ -54,6 +54,12 @@ class ServiceMainMenu(ServiceModeBase):
     def mode_started(self):
         super(ServiceMainMenu, self).mode_started()
         
+        self.game.modes.modes = []
+        self.game.modes.modes.append(self)
+        
+        self.game.sound.stop_music()
+        
+        base.screenManager.hideAllScreens()
         
         # Show the screen finally
         base.screenManager.showScreen("svc_main")
@@ -64,7 +70,7 @@ class ServiceMainMenu(ServiceModeBase):
     def mode_stopped(self):
         super(ServiceMainMenu, self).mode_stopped()
         base.screenManager.hideScreen("svc_main")
-        self.game.modes.add(self.game.attract)
+        self.game.reset()
         
     def sw_down_active(self, sw):
         self.screen.menu.down()
@@ -217,6 +223,7 @@ class ServiceLog(ServiceModeBase):
         self.lines_per_page = 25
         self.num_lines = 0
         self.line_ptr = 0
+        self.lines = []
         
     def mode_started(self):
         self.screen = base.screenManager.getScreen("svc_log")
@@ -225,16 +232,16 @@ class ServiceLog(ServiceModeBase):
         log_text = ""
         
         with open("system.log","r") as f:
-            lines = f.readlines()
+            self.lines = f.readlines()
         
-        self.num_lines = len(lines)
+        self.num_lines = len(self.lines)
         if self.num_lines < self.lines_per_page:
             self.lines_per_page = self.num_lines
             
         self.line_ptr = self.num_lines - self.lines_per_page
         
         for i in range(self.line_ptr, self.line_ptr + self.lines_per_page):
-            log_text += lines[i]
+            log_text += self.lines[i]
         
         self.screen.set_log_text(log_text)
         
@@ -245,12 +252,33 @@ class ServiceLog(ServiceModeBase):
     def sw_down_active(self, sw):
         self.game.sound.play('service_down')
         
+        self.line_ptr += self.lines_per_page
+        if self.line_ptr >= len(self.lines) - 1:
+            self.line_ptr = len(self.lines) - 1 - self.lines_per_page;
+            if self.line_ptr < 0:
+                self.line_ptr = 0
+                
+        self.update_page()
         
         return True
     
     def sw_up_active(self, sw):
         self.game.sound.play('service_up')
+        
+        self.line_ptr -= self.lines_per_page
+        if self.line_ptr < 0:
+            self.line_ptr = 0
+             
+        self.update_page()
+        
         return True
+    
+    def update_page(self):
+        log_text = ""
+        for i in range(self.line_ptr, self.line_ptr + self.lines_per_page):
+            log_text += self.lines[i]
+        
+        self.screen.set_log_text(log_text)
         
     def sw_enter_active(self, sw):
         return True

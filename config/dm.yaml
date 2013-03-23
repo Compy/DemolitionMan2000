@@ -152,11 +152,11 @@ PRSwitches:
         number: S61
     sideRampExit:
         number: S62
-    leftRollOver:
+    mtlM:
         number: S63
-    centerRollOver:
+    mtlT:
         number: S64
-    rightRollOver:
+    mtlL:
         number: S65
     eject:
         number: S66

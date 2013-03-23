@@ -447,10 +447,10 @@ class DMDSpriteFont(object):
             
             
 class Sprite:
-    def __init__(self, parent, file_name, file_type, num_frames, int_padding = 1, scale=(1,1,1), fps = 60):
+    def __init__(self, parent, file_name, file_type, num_frames, int_padding = 1, scale=(1,1,1), fps = 60, pos=(0,0,0)):
         self.textures = self.loadTextureMovie(num_frames, file_name, file_type, int_padding)
         self.plane = base.loader.loadModel('assets/models/plane')
-        self.plane.setPos(0,0,0)         #set its position
+        self.plane.setPos(pos[0],pos[1],pos[2])         #set its position
         self.plane.setScale(scale[0], scale[1], scale[2])
         self.plane.reparentTo(parent)       #reparent to render
         self.plane.setTransparency(1)
@@ -485,6 +485,14 @@ class Sprite:
         
     def reparentTo(self, node):
         self.plane.reparentTo(node)
+        
+    def show(self):
+        self.plane.show()
+        self.play(0)
+        
+    def hide(self):
+        self.plane.hide()
+        self.stop()
         
     def play(self, loops = 1):
         self.loops = loops

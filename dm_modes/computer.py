@@ -40,6 +40,7 @@ class ComputerMode(DMMode):
         
     def mode_started(self):
         self.logger.info("Starting computer mode...")
+        self.cancel_all_delayed()
         self.game.lamps.computer.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)
         self.computer_screen = base.screenManager.getScreen("computer")
         self.award_in_progress = False
@@ -52,6 +53,7 @@ class ComputerMode(DMMode):
         
     def sw_bottomPopper_active_for_200ms(self, sw):
         # Computer award
+        self.logger.info("Bottom Popper Active for 200ms, starting computer mode")
         self.start_award()
         return True
     
@@ -62,14 +64,14 @@ class ComputerMode(DMMode):
         self.game.sound.play("computer_award", fade_music=True)
         self.award = self.computer_awards[random.randrange(0,len(self.computer_awards) - 1)]
         
-        self.logger.info("Computer awards " + self.award[0])
-        
+        self.cancel_delayed('say_computer_award')
         self.delay(name='say_computer_award', event_type=None, delay=2.1, handler=self.announce_award)
-        
+        self.cancel_delayed('end_computer')
         self.delay(name='end_computer', event_type=None, delay=4, handler=self.end_computer)
         self.award_in_progress = True
     
     def announce_award(self):
+        self.logger.info("announce_award::Computer awards " + self.award[0])
         if self.award[1] != None:
             self.game.sound.play(self.award[1], fade_music=True)
         
@@ -104,6 +106,7 @@ class ComputerMode(DMMode):
     
     def end_computer(self):
         #self.game.sound.set_music_volume(0.6)
+        self.logger.info("Computer::end_computer called")
         self.game.current_player().computer_lit = False
         self.game.base_game_mode.release_bottomPopper()
         self.game.modes.remove(self)

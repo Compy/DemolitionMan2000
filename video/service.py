@@ -422,9 +422,8 @@ class Log(ServiceScreenBase):
                                        fg=(1,1,1,1),
                                        pos=(-1.3,0.80),
                                        align=TextNode.ALeft,
-                                       scale=.07,
+                                       scale=.05,
                                        mayChange=True,
-                                       font = base.fontLoader.load('eurostile.ttf'),
                                        parent=self.node2d)
         
     def set_log_text(self, text):

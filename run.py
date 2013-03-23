@@ -28,7 +28,7 @@ except:
     except:
         pass
 
-SIMULATE = True
+SIMULATE = False
 
 # Uncomment for full-screen ness
 if not SIMULATE: loadPrcFileData('', 'fullscreen 1')

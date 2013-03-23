@@ -46,6 +46,7 @@ class ComboMode(DMMode):
         
     def mode_started(self):
         self.logger.info("Starting combo mode...")
+        self.cancel_all_delayed()
         #base.screenManager.showScreen("skillshot", False)
         #self.skillshot_screen = base.screenManager.getScreen("skillshot")
         

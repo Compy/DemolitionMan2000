@@ -164,6 +164,13 @@ class ScreenManager(object):
     def hideScreen(self, screen_name):
         base.display_queue.put_nowait(partial(self._thread_safe_hideScreen, screen_name = screen_name))
         
+    def hideAllScreens(self):
+        base.display_queue.put_nowait(partial(self._thread_safe_hideAllScreens))
+        
+    def _thread_safe_hideAllScreens(self):
+        for screen in self.screens:
+            self.screens[screen].hide()
+        
     def _thread_safe_hideScreen(self, screen_name):
         self.screens[screen_name].hide()
         

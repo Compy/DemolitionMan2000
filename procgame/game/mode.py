@@ -174,6 +174,8 @@ class Mode(object):
 			event_type = {'closed':1, 'open':2}[event_type]
 		if name == None:
 			name = 'anon_delay'+str(uuid.uuid1())
+		else:
+			self.cancel_delayed(name)
 		self.__delayed.append(Mode.Delayed(name=name, time=time.time()+delay, handler=handler, event_type=event_type, param=param))
 		try:
 			self.__delayed.sort(lambda x, y: int((x.time - y.time)*100))
@@ -183,6 +185,9 @@ class Mode(object):
 				print(x)
 			raise ex
 		return name
+	
+	def cancel_all_delayed(self):
+		self.__delayed = []
 	
 	def cancel_delayed(self, name):
 		"""Removes the given named delays from the delayed list, cancelling their execution."""

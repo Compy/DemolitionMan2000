@@ -31,6 +31,7 @@ class AttractMode(DMMode):
         
     def mode_started(self):
         self.logger.info("Starting attract mode")
+        self.cancel_all_delayed()
         #self.delay(name='mode_started', event_type=None, delay=5, handler=self.boot_finish)
         self.delay(name='stuck_balls', event_type=None, delay=2, handler=self.release_stuck_balls)
         base.screenManager.hideScreen("score")
@@ -113,6 +114,7 @@ class AttractMode(DMMode):
         self.game.gi_off()
         self.game.lampController.play_show("gameend", repeat=True)
         self.game.sound.play_music("gameend")
+        self.cancel_delayed('outtro_out')
         self.delay('outtro_out', event_type=None, delay=23, handler=self.end_outtro)
         
     def end_outtro(self):
