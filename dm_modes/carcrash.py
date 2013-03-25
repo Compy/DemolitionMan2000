@@ -56,6 +56,10 @@ class CarCrashMode(DMMode):
         self.ignore_top = True
         self.delay('unignore_top_car', event_type=None, delay=3, handler=self.unignore_top)
         self.game.sound.play("crash")
+        
+        if not self.game.car_chase.is_started() and not self.game.current_player().car_chase:
+            self.game.modes.add(self.game.car_chase)
+            
     
         
     def unignore_bottom(self):

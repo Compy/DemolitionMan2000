@@ -242,6 +242,7 @@ class MainMenu(ServiceScreenBase):
         self.menu.addItem("Reporting", self._menuSelectionMade)
         self.menu.addItem("3D Placement", self._menuSelectionMade)
         self.menu.addItem("Update Code", self._menuSelectionMade)
+        self.menu.addItem("Restart", self._menuSelectionMade)
         self.menu.setPos(-0.92,0,0)
         self.menu.show()
         self.uiitems.append(self.menu)

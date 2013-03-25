@@ -19,9 +19,14 @@ class AcmagMode(DMMode):
     def mode_started(self):
         self.logger.info("Starting ACMAG mode...")
         self.screen = base.screenManager.getScreen("acmag")
-        self.screen.mode_started()
+        
         base.screenManager.getScreen("score").set_score_color((1,0,0,1))
-        self.game.sound.play_music("acmag",-1)
+        if not self.game.car_chase.is_started():
+            self.game.sound.play_music("acmag",-1)
+            base.screenManager.getScreen("stack").clear_stacks()
+        
+        self.screen.mode_started()
+            
         self.game.sound.play("computer_acmag", fade_music=True)
         self.game.base_game_mode.set_timer(30)
         self.game.base_game_mode.start_timer()
@@ -48,9 +53,11 @@ class AcmagMode(DMMode):
         
     def timeout(self):
         self.logger.info("ACMAG timeout")
-        self.game.sound.play_music("main",-1)
         self.mode_accomplished = True
         self.game.modes.remove(self)
+        
+        if self.game.trough.num_balls_in_play > 0:
+            self.game.sound.play_music("main",-1)
         
         
     def toggle_score_color(self):

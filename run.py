@@ -14,6 +14,7 @@ import threading
 import time
 import sys
 import p3dsound
+import platform
 
 from functools import partial
 from Queue import Queue as pyQueue
@@ -28,7 +29,7 @@ except:
     except:
         pass
 
-SIMULATE = False
+SIMULATE = (platform.system() == "Darwin")
 
 # Uncomment for full-screen ness
 if not SIMULATE: loadPrcFileData('', 'fullscreen 1')
@@ -53,7 +54,7 @@ from direct.showbase.PythonUtil import *
 
 
 logging.basicConfig(level=logging.INFO,
-                    filename='system.log',
+                    #filename='system.log',
                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
@@ -235,6 +236,17 @@ class PinboxApp(ShowBase):
     def exit(self, exit_code = 0):
         self.do_exit = True
         self.exit_code = exit_code
+        
+    def format_score(self,x):
+        if type(x) not in [type(0), type(0L)]:
+            raise TypeError("Parameter must be an integer.")
+        if x < 0:
+            return '-' + self.format_score(-x)
+        result = ''
+        while x >= 1000:
+            x, r = divmod(x, 1000)
+            result = ",%03d%s" % (r, result)
+        return "%d%s" % (x, result)
 
 if __name__ == '__main__':
     app = PinboxApp()

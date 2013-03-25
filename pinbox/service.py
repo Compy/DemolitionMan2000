@@ -50,6 +50,7 @@ class ServiceMainMenu(ServiceModeBase):
         self.screen.addMenuSelectionHandler("3D Placement", self._enter3D)
         self.screen.addMenuSelectionHandler("Diagnostics", self._enterDiagnostics)
         self.screen.addMenuSelectionHandler("Update Code", self._updateCode)
+        self.screen.addMenuSelectionHandler("Restart", self._restart)
         
     def mode_started(self):
         super(ServiceMainMenu, self).mode_started()
@@ -94,6 +95,11 @@ class ServiceMainMenu(ServiceModeBase):
     def _updateCode(self):
         logging.info("UpdateCode")
         self.game.modes.add(self.game.service_update_code)
+        
+    def _restart(self):
+        logging.info("Requesting system reset")
+        self.game.exit_code = -13
+        self.game.exit = True
         
  
 class ServiceDiagnosticsMenu(ServiceModeBase):

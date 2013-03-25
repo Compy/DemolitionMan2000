@@ -254,12 +254,14 @@ class LampShowMode(game.Mode):
 		self.show_over = True
 		self.logger = logging.getLogger('game.lamps')
 
-	def load(self, filename, repeat=False, callback='None'):
+	def load(self, filename, repeat=False, callback='None', loops = 1):
 		"""Load a new lamp show."""
 		self.callback = callback
 		self.repeat = repeat
 		self.lampshow.reset()
 		self.lampshow.load(filename)
+		self.loops = loops
+		self.current_loop = 1
 		self.restart()
 
 	def restart(self):
@@ -270,6 +272,9 @@ class LampShowMode(game.Mode):
 	def mode_tick(self):
 		if self.lampshow.is_complete() and not self.show_over:
 			if self.repeat:
+				self.restart()
+			elif self.loops > 1 and self.current_loop <= self.loops:
+				self.current_loop += 1
 				self.restart()
 			else:
 				self.cancel_delayed('show_tick')
@@ -299,11 +304,11 @@ class LampController(object):
 		self.logger.info("Registering lampshow - key: %s file: %s", key, show_file)
 		self.shows[key] = show_file
 
-	def play_show(self, key, repeat=False, callback='None'):
+	def play_show(self, key, repeat=False, callback='None', loops = 1):
 		# Always stop any previously running show first.
 		self.logger.info("Playing lampshow %s (Repeat %s)", key, repeat)
 		self.stop_show()
-		self.show.load(self.shows[key], repeat, callback)
+		self.show.load(self.shows[key], repeat, callback, loops)
 		self.game.modes.add(self.show)
 		self.show_playing = True
 

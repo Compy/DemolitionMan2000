@@ -17,7 +17,7 @@ from procgame.highscore import *
 from procgame.modes import BallSave, Trough, BallSearch
 from procgame.game import BasicPinboxGame
 from dm_modes import elevator, boot, attract, blocks, skillshot, basemode, status, bonus, claw, combos, carcrash, sanangeles
-from dm_modes import computer, acmag, match
+from dm_modes import computer, acmag, match, carchase
 from pinbox import service
 from player import DMPlayer
 import pinproc
@@ -80,6 +80,8 @@ class HWGame(BasicPinboxGame):
         # Run the setup function to actually begin the boot sequence
         self.setup()
         
+        self.is_divertor_open = False
+        
     def setup(self):
         """
         Sets up the entire game including registering sounds with our AV controller.
@@ -130,6 +132,7 @@ class HWGame(BasicPinboxGame):
         self.match = match.MatchMode(self)
         self.carcrash = carcrash.CarCrashMode(self)
         self.wtsa = sanangeles.SanAngelesMode(self)
+        self.car_chase = carchase.CarChaseMode(self)
         ## SERVICE MODES AND SUBMODES ##
         self.service = service.ServiceMainMenu(self)
         self.service_diagnostics = service.ServiceDiagnosticsMenu(self)
@@ -159,6 +162,9 @@ class HWGame(BasicPinboxGame):
             category.load_from_game(self)
         
         logging.info("Trough ball count: %s" % str(self.trough.num_balls()))
+        
+        self.ballsearch_coils = ['leftSlingshot', 'rightSlingshot', 'leftJet', 'rightJet', 'bottomJet', 'eject', 'topPopper', 'bottomPopper']
+        
         self.assets()
         self.reset()
         
@@ -196,6 +202,33 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("gunshot", "assets/sfx/gunshot.wav")
         self.sound.register_sound("gunshots", "assets/sfx/multiple_gunshots.wav")
         self.sound.register_sound("computer_award", "assets/sfx/computer_award.wav")
+        self.sound.register_sound("spinner", "assets/sfx/spinner.wav")
+        self.sound.register_sound("acmag_hit", "assets/sfx/acmag_hit.wav")
+        self.sound.register_sound("skillshot", "assets/sfx/skillshot.wav")
+        self.sound.register_sound("vuk", "assets/sfx/vuk.wav")
+        self.sound.register_sound("target_hit", "assets/sfx/target_hit.wav")
+        self.sound.register_sound("freeze", "assets/sfx/freeze.wav")
+        self.sound.register_sound("loop", "assets/sfx/loop.wav")
+        self.sound.register_sound("ramp_up", "assets/sfx/ramp_up.wav")
+        self.sound.register_sound("extraball", "assets/sfx/extraball_music.wav")
+        self.sound.register_sound("mtl_whoosh", "assets/sfx/mtl_whoosh.wav")
+        self.sound.register_sound("dontmove", "assets/speech/spartan_dontmove.wav")
+        
+        
+        self.sound.register_sound("tires", "assets/sfx/tires.wav")
+        self.sound.register_sound("crash", "assets/sfx/crash.wav")
+        self.sound.register_sound("zap", "assets/sfx/zap.wav")
+        self.sound.register_sound("engine", "assets/sfx/engine.wav")
+        self.sound.register_sound("retina", "assets/sfx/retina_scan.wav")
+        self.sound.register_sound("retina_eject", "assets/sfx/retina_eject.wav")
+        
+        # SPEECH
+        self.sound.register_sound("boggle", "assets/speech/boggle.wav")
+        self.sound.register_sound("cows", "assets/speech/huxley_cows.wav")
+        self.sound.register_sound("leary_jello", "assets/speech/leary_jello.wav")
+        self.sound.register_sound("seashells", "assets/speech/seashells.wav")
+        self.sound.register_sound("verbal_fine", "assets/speech/verbal_fine.wav")
+        
         self.sound.register_sound("computer_double_retina_scan", "assets/speech/computer_double_retina_scan.wav")
         self.sound.register_sound("computer_explode_activated", "assets/speech/computer_explode_activated.wav")
         self.sound.register_sound("computer_explode_hurryup", "assets/speech/computer_explode_hurryup.wav")
@@ -213,28 +246,16 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("praise", "assets/speech/spartan_niceshooting.wav")
         self.sound.register_sound("praise", "assets/speech/spartan_niceshot.wav")
         self.sound.register_sound("praise", "assets/speech/spartan_verynice.wav")
-        self.sound.register_sound("spinner", "assets/sfx/spinner.wav")
-        self.sound.register_sound("acmag_hit", "assets/sfx/acmag_hit.wav")
-        self.sound.register_sound("skillshot", "assets/sfx/skillshot.wav")
-        self.sound.register_sound("vuk", "assets/sfx/vuk.wav")
-        self.sound.register_sound("target_hit", "assets/sfx/target_hit.wav")
-        self.sound.register_sound("freeze", "assets/sfx/freeze.wav")
-        self.sound.register_sound("loop", "assets/sfx/loop.wav")
-        self.sound.register_sound("ramp_up", "assets/sfx/ramp_up.wav")
-        self.sound.register_sound("extraball", "assets/sfx/extraball_music.wav")
-        self.sound.register_sound("mtl_whoosh", "assets/sfx/mtl_whoosh.wav")
-        self.sound.register_sound("dontmove", "assets/speech/spartan_dontmove.wav")
-        
-        self.sound.register_sound("tires", "assets/sfx/tires.wav")
-        self.sound.register_sound("crash", "assets/sfx/crash.wav")
-        self.sound.register_sound("zap", "assets/sfx/zap.wav")
-        
-        # SPEECH
-        self.sound.register_sound("boggle", "assets/speech/boggle.wav")
-        self.sound.register_sound("cows", "assets/speech/huxley_cows.wav")
-        self.sound.register_sound("leary_jello", "assets/speech/leary_jello.wav")
-        self.sound.register_sound("seashells", "assets/speech/seashells.wav")
-        self.sound.register_sound("verbal_fine", "assets/speech/verbal_fine.wav")
+        self.sound.register_sound("huxley_gotit", "assets/speech/huxley_gotit.wav")
+        self.sound.register_sound("huxley_scream", "assets/speech/huxley_scream.wav")
+        self.sound.register_sound("simon_lovely", "assets/speech/simon_lovely.wav")
+        self.sound.register_sound("simon_right", "assets/speech/simon_right.wav")
+        self.sound.register_sound("spartan_catchup", "assets/speech/spartan_catchup.wav")
+        self.sound.register_sound("spartan_left", "assets/speech/spartan_left.wav")
+        self.sound.register_sound("spartan_push_pedal", "assets/speech/spartan_push_pedal.wav")
+        self.sound.register_sound("spartan_push", "assets/speech/spartan_push.wav")
+        self.sound.register_sound("spartan_scream", "assets/speech/spartan_scream.wav")
+        self.sound.register_sound("spartan_yeah", "assets/speech/spartan_yeah.wav")
         
         logging.info("Loading music")
         #self.sound.register_music("main", "assets/music/mainplay.wav")
@@ -415,6 +436,7 @@ class HWGame(BasicPinboxGame):
             reset_switches=self.ballsearch_resetSwitches, \
             stop_switches=self.ballsearch_stopSwitches, \
             special_handler_modes=special_handler_modes)
+        self.ball_search.disable()
         
     def invert_flippers(self, enable):
         """Enables or disables the flippers AND bumpers."""

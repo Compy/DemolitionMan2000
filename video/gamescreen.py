@@ -107,7 +107,7 @@ class GameScreen(object):
     def is_hidden(self):
         return self.hidden
     
-    def place_model(self, model_name, scale, pos, rotate = False, rotspeed = 4, h = 0, p = 0, r = 0, reference = ""):
+    def place_model(self, model_name, scale, pos, rotate = False, rotspeed = 4, h = 0, p = 0, r = 0, reference = "", mode = ""):
         model = base.loader.loadModel("assets/models/" + model_name)
         
         if reference == "":
@@ -142,6 +142,7 @@ class GameScreen(object):
         result['model'] = model
         result['reference'] = reference
         result['name'] = model_name
+        result['mode'] = mode
         
         self.models.append(result)
         
@@ -154,6 +155,7 @@ class GameScreen(object):
         self.last_removed_model[location] = mObj['name'].split(".")[0]
         self.remove_model(lower_model_ref)
         self.shift_down(location)
+        print "last removed models " + str(self.last_removed_model)
         
     def shift_down(self, location):
         if len(self.stack[location]) < 1: return
@@ -169,7 +171,19 @@ class GameScreen(object):
                 m = model['model']
                 model['model'].posInterval(pos=(m.getX(), m.getY(), m.getZ() - 10), duration=1.2, blendType='easeIn').start()
     
-    def location_has_object(self, location):
+    def location_has_object(self, location, mode = ""):
+        if len(self.stack[location]) == 0:
+            return False
+        
+        if mode != "":
+            lower_model_ref = self.stack[location][0]
+            mObj = self.get_model(lower_model_ref)
+            #print "Location_has_object " + location + " " + mode + " " + mObj['mode']
+            if mObj['mode'] == mode:
+                return True
+            else:
+                return False
+        
         return len(self.stack[location]) > 0        
                                                      
     def remove_model(self, reference):
@@ -194,7 +208,6 @@ class GameScreen(object):
                     x = mObj.getX()
                     y = mObj.getY()
                     z = mObj.getZ()
-                    print m['reference'] + " at " + str(x) + "," + str(y) + "," + str(z)
                 
     def clear_stacks(self, location = "all"):
         referencesToRemove = []
@@ -224,5 +237,10 @@ class GameScreen(object):
             model = mObj['model']
             model.setPos((lowest_pos[0],lowest_pos[1],lowest_pos[2] + (10 * i)))
             i += 1
+            
+    def get_last_removed_model(self, location):
+        pass
+    def clear_last_removed_model(self, location):
+        pass
         
         

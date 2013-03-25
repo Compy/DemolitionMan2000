@@ -67,30 +67,35 @@ class SanAngelesMode(DMMode):
         
     def sw_rightRampEnter_active(self, sw):
         if self.switch_ignores['right_enter'] or not self.screen.explode_right():
-            self.screen.last_removed_model['right_ramp'] = ""
+            self.screen.clear_last_removed_model('right_ramp')
             return
         
         self.game.sound.play("explode")
             
         self.ignore_switch('right_enter')
         
-        self.play_sound(self.screen.last_removed_model['right_ramp'])
+        self.play_sound(self.screen.get_last_removed_model('right_ramp'))
         self.game.base_game_mode.pause_timer(3)
-        self.process_award(self.screen.last_removed_model['right_ramp'])
+        self.process_award(self.screen.get_last_removed_model('right_ramp'))
+        
+        print "sanangeles right ramp enter "  + self.screen.get_last_removed_model('right_ramp')
+        
         #self.game.lampController.play_show("wtsa",
         #                                   repeat=True)
         
     
     def sw_leftRampEnter_active(self, sw):
         if self.switch_ignores['left_enter'] or not self.screen.explode_left():
-            self.screen.last_removed_model['left_ramp'] = ""
+            self.screen.clear_last_removed_model('left_ramp')
             return
         
         self.game.sound.play("explode")
         self.ignore_switch('left_enter')
-        self.play_sound(self.screen.last_removed_model['left_ramp'])
+        self.play_sound(self.screen.get_last_removed_model('left_ramp'))
         
         self.game.base_game_mode.pause_timer(3)
+        
+        print "sanangeles left ramp enter "  + self.screen.get_last_removed_model('left_ramp')
         
         self.process_award(self.screen.last_removed_model['left_ramp'])
         #self.game.lampController.play_show("wtsa",
@@ -101,13 +106,16 @@ class SanAngelesMode(DMMode):
     
     def sw_centerRamp_active(self, sw):
         if not self.screen.explode_center():
-            self.screen.last_removed_model['center_ramp'] = ""
+            self.screen.clear_last_removed_model('center_ramp')
             return
         self.game.sound.play("explode")
-        self.play_sound(self.screen.last_removed_model['center_ramp'])
+        self.play_sound(self.screen.get_last_removed_model('center_ramp'))
         
         self.game.base_game_mode.pause_timer(3)
-        self.process_award(self.screen.last_removed_model['center_ramp'])
+        self.process_award(self.screen.get_last_removed_model('center_ramp'))
+        
+        print "sanangeles center ramp enter " + self.screen.get_last_removed_model('center_ramp')
+        
         #self.game.lampController.play_show("wtsa",
         #                                   repeat=True)
         
@@ -123,6 +131,9 @@ class SanAngelesMode(DMMode):
         if award == "burger":
             message = "300,000"
             self.game.score(300000)
+        if award == "bonus_x":
+            self.game.current_player().bonus_x += 1
+            message = "Multiplier Increased!"
             
         base.screenManager.showModalMessage(
                                     message = message,

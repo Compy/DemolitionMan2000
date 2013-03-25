@@ -19,6 +19,8 @@ from computer import ComputerScreen
 from acmag import AcmagScreen
 from match import MatchScreen
 from sanangeles import SanAngelesScreen
+from stack import StackScreen
+from carchase import CarChaseScreen
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText, TextNode
 from functools import partial
@@ -97,6 +99,7 @@ class ScreenManager(object):
         self.screens['svc_flashers'] = Flashers(self)
         self.screens['svc_switches'] = Switches(self)
         self.screens['svc_log'] = Log(self)
+        self.screens['stack'] = StackScreen(self)
         self.screens['attract1'] = PCCScreen(self)
         self.screens['attract2'] = DMIntroScreen(self)
         self.screens['attract3'] = HighScoreDisplay(self)
@@ -109,6 +112,7 @@ class ScreenManager(object):
         self.screens['acmag'] = AcmagScreen(self)
         self.screens['match'] = MatchScreen(self)
         self.screens['wtsa'] = SanAngelesScreen(self)
+        self.screens['carchase'] = CarChaseScreen(self)
     
     def getScreen(self, name):
         return self.screens[name]

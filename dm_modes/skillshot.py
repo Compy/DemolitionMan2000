@@ -60,9 +60,24 @@ class SkillShotMode(DMMode):
     def sw_sideRampExit_active(self, sw):
         # Skillshot obtained!
         self.game.current_player().player_stats['completed_skillshots'] += 1
-        self.game.score((self.game.current_player().player_stats['completed_skillshots']) * 5000000)
+        award = (self.game.current_player().player_stats['completed_skillshots']) * 5000000
+        self.game.score()
         self.game.sound.play("skillshot")
         # Play some awesome sfx and speech
+        
+        base.screenManager.showModalMessage(
+                                            message="Skillshot!\n" + str(award), 
+                                            modal_name="ball_save", 
+                                            fg=(1,0,0,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            start_location=(1.5,0,0),
+                                            end_location=(0,0,0),
+                                            animation='slide',
+                                            time = 4)
+        
         self.end_skillshot()
         
     def end_skillshot(self):

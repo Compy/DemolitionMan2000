@@ -10,3 +10,9 @@ if [ "$ecode" == "-13" ]; then
 	sleep 2
 	./demo_man.sh &
 fi
+
+if [ "$ecode" == "-14" ]; then
+    echo "Restarting PC"
+    sleep 2
+    shutdown -r now
+fi

@@ -109,9 +109,20 @@ class ScoreScreen(GameScreen):
                                 scale=(2.5,2.5,2.5),
                                 pos=(12,40,15))
         
+        self.retina = Sprite(
+                                parent=self.node, 
+                                file_name="assets/sprites/retina/retina_scan_", 
+                                file_type="png", 
+                                num_frames=36, 
+                                int_padding=2,
+                                scale=(7.5,7.5,7.5),
+                                pos=(-10,40,0),
+                                auto_gc = False)
+        
         self.hide_m()
         self.hide_t()
         self.hide_l()
+        self.hide_retina()
         
         
     def spin_spinner(self):
@@ -148,7 +159,8 @@ class ScoreScreen(GameScreen):
         if score == 0:
             self.score_text.setText("00")
         else:
-            self.score_text.setText(str(locale.format("%d", score, grouping=True)))
+            #self.score_text.setText(str(locale.format("%d", score, grouping=True)))
+            self.score_text.setText(str(base.format_score(score)))
         
     def update_ball(self, ball):
         self.ball_text.setText("BALL " + str(ball))
@@ -230,3 +242,9 @@ class ScoreScreen(GameScreen):
     
     def hide_l(self):
         self.mtlL.hide()
+        
+    def show_retina(self):
+        self.retina.show(1)
+        
+    def hide_retina(self):
+        self.retina.hide()

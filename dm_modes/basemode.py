@@ -40,7 +40,7 @@ class BaseMode(DMMode):
         self.game.trough.launch_balls(1, self.ball_launch_callback)
 
         # Enable ball search in case a ball gets stuck during gameplay.
-        self.game.ball_search.enable()
+        #self.game.ball_search.enable()
 
         # Reset tilt warnings and status
         self.times_warned = 0;
@@ -66,6 +66,7 @@ class BaseMode(DMMode):
             self.game.enable_flippers(False)
             self.finish_ball()
             self.stop_timer()
+            self.game.current_player().timer = 0
             
             for mode in self.game.modes:
                 mode.ball_drained()
@@ -108,7 +109,7 @@ class BaseMode(DMMode):
 
         # Deactivate the ball search logic so it won't search due to no
         # switches being hit.
-        self.game.ball_search.disable()
+        #self.game.ball_search.disable()
 
     def finish_ball(self):
         #self.game.sound.fadeout_music()
@@ -155,11 +156,13 @@ class BaseMode(DMMode):
     
     
     def sw_leftSlingshot_active(self, sw):
+        self.pause_timer(2)
         self.game.score(230)
         self.game.sound.play("slingshot")
         self.game.coils.ejectFlasher.pulse(60)
         
     def sw_rightSlingshot_active(self, sw):
+        self.pause_timer(2)
         self.game.score(230)
         self.game.sound.play("slingshot")
         self.game.coils.lowerReboundFlasher.pulse(60)
@@ -174,7 +177,7 @@ class BaseMode(DMMode):
         self.game.current_player().tlit = currentM
         self.game.current_player().llit = currentT
         
-        self.show_mtl()
+        self.show_mtl(False)
         
     def sw_flipperLwR_closed_for_3s(self, sw):
         if not self.game.status_display_mode.is_started():
@@ -191,6 +194,7 @@ class BaseMode(DMMode):
         self.add_acmag_percentage()
         self.game.sound.play("jet")
         self.game.score(510)
+        self.game.coils.jetsFlasher.pulse(40)
         self.pause_timer(3)
         
     def sw_rightJet_active(self, sw):
@@ -198,6 +202,7 @@ class BaseMode(DMMode):
         self.add_acmag_percentage()
         self.game.sound.play("jet")
         self.game.score(510)
+        self.game.coils.jetsFlasher.pulse(40)
         self.pause_timer(3)
         
     def sw_bottomJet_active(self, sw):
@@ -205,6 +210,7 @@ class BaseMode(DMMode):
         self.add_acmag_percentage()
         self.game.sound.play("jet")
         self.game.score(510)
+        self.game.coils.jetsFlasher.pulse(40)
         self.pause_timer(3)
     
     def add_acmag_percentage(self):
@@ -228,8 +234,31 @@ class BaseMode(DMMode):
             if p != False:
                 base.screenManager.showModalMessage(message=p.name + " added", modal_name="player_add", bg=(0,0,1,1), time = 2)
             
-    def sw_eject_closed_for_500ms(self, sw):
+    def sw_eject_active_for_100ms(self, sw):
+        self.game.coils.ejectFlasher.schedule(schedule=0xaaaaaaaa, cycle_seconds=1, now=True)
+        self.delay('retina_eject', event_type=None, delay=3, handler=self.retina_eject)
+        self.game.sound.play("retina")
+        self.screen.show_retina()
+        self.delay('retina_show', event_type=None, delay=1, handler=self.show_retina_text)
+        
+    def show_retina_text(self):
+        base.screenManager.showModalMessage(
+                                            message="SCAN\nDENIED", 
+                                            modal_name="retina", 
+                                            fg=(0,1,1,1),
+                                            frame_color=(0,0,0,0),
+                                            blink_speed=0.25,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1),
+                                            start_location=(-0.9,0,-0.5),
+                                            scale=(0.1,0.1,0.1),
+                                            time = 2)
+        
+    def retina_eject(self):
+        self.game.sound.play("retina_eject")
         self.game.coils.eject.pulse()
+        self.screen.hide_retina()
+        self.game.coils.ejectFlasher.schedule(schedule=0x0000aaaa, cycle_seconds=1, now=True)
         
     def sw_bottomPopper_active_for_250ms(self, sw):
         if self.game.current_player().arrow_subway:
@@ -251,12 +280,14 @@ class BaseMode(DMMode):
         self.delay('vuk', event_type=None, delay=1, handler=self.game.coils.bottomPopper.pulse, param=50)
         
     def sw_topPopper_active_for_700ms(self, sw):
+        self.pause_timer(3)
         if self.game.current_player().extraball_lit:
             self.game.gi_off()
             self.game.sound.play("extraball")
             self.game.current_player().extra_balls += 1
             self.delay('top_vuk',event_type=None,delay=3,handler=self.post_extraball_release)
             self.game.lamps.extraBall.disable()
+            self.game.lamps.shootAgain.pulse(0)
             self.game.current_player().extraball_lit = False
         else:
             self.game.coils.topPopper.pulse()
@@ -337,10 +368,13 @@ class BaseMode(DMMode):
         if self.game.current_player().timer <= 0:
             base.display_queue.put_nowait(partial(self.screen.update_timer_text, text="--"))
         
-    def pause_timer(self, pause_secs):
+    def pause_timer(self, pause_secs = 0):
         self.stop_timer()
         self.cancel_delayed('timer_pause')
-        self.delay('timer_pause', event_type=None, delay=pause_secs, handler=self.start_timer)
+        if self.game.current_player().timer <= 0:
+            return
+        if pause_secs > 0:
+            self.delay('timer_pause', event_type=None, delay=pause_secs, handler=self.start_timer)
         
     def add_time(self, time_to_add, max_time = 30):
         self.game.current_player().timer += time_to_add
@@ -349,6 +383,7 @@ class BaseMode(DMMode):
         
     def sw_centerRamp_active(self, sw):
         self.game.score(2010)
+        self.pause_timer(3)
         if self.game.current_player().arrow_acmag:
             self.do_laser_millions()
             self.game.current_player().arrow_acmag = False
@@ -362,6 +397,7 @@ class BaseMode(DMMode):
                                            )
     def sw_leftLoop_active(self, sw):
         self.game.score(600)
+        self.pause_timer(2)
         if self.game.current_player().arrow_left_loop:
             self.do_laser_millions()
             self.game.current_player().arrow_left_loop = False
@@ -395,6 +431,7 @@ class BaseMode(DMMode):
             self.game.lamps.rightRampArrow.disable()
         
     def sw_rightFreeway_active(self, sw):
+        self.pause_timer(3)
         if self.game.current_player().arrow_right_loop:
             self.do_laser_millions()
             self.game.current_player().arrow_right_loop = False
@@ -405,6 +442,7 @@ class BaseMode(DMMode):
         
     def sw_rightRampEnter_active(self, sw):
         if self.ignore_switches["right_ramp"]: return
+        self.pause_timer(2)
         self.ignore_switch("right_ramp")
         self.game.sound.play("ramp_up")
         self.game.coils.rightRampFlasher.schedule(schedule=0x0000dddd, cycle_seconds=1, now=True)
@@ -416,6 +454,7 @@ class BaseMode(DMMode):
         
     def sw_leftRampEnter_active(self, sw):
         if self.ignore_switches["left_ramp"]: return
+        self.pause_timer(2)
         self.ignore_switch("left_ramp")
         self.game.sound.play("ramp_up")
         self.game.coils.leftRampLwrFlasher.schedule(schedule=0x0000dddd, cycle_seconds=1, now=True)
@@ -435,21 +474,24 @@ class BaseMode(DMMode):
         self.screen.show_laser_millions()
         
     def sw_mtlM_active(self, sw):
+        self.pause_timer(3)
         self.game.current_player().mlit = True
         self.show_mtl()
         self.game.sound.play("mtl_whoosh")
     
     def sw_mtlT_active(self, sw):
+        self.pause_timer(3)
         self.game.current_player().tlit = True
         self.show_mtl()
         self.game.sound.play("mtl_whoosh")
     
     def sw_mtlL_active(self, sw):
+        self.pause_timer(3)
         self.game.current_player().llit = True
         self.show_mtl()
         self.game.sound.play("mtl_whoosh")
         
-    def show_mtl(self):
+    def show_mtl(self, extend_timer = True):
         self.screen.hide_timer()
         self.screen.hide_ball()
         self.screen.hide_m()
@@ -462,9 +504,10 @@ class BaseMode(DMMode):
         if self.game.current_player().llit:
             self.screen.show_l()
             
-        self.mtl_shown = True
-            
-        self.delay('hide_mtl', event_type=None, delay=5, handler=self.hide_mtl)
+        if extend_timer:
+            self.mtl_shown = True
+                
+            self.delay('hide_mtl', event_type=None, delay=5, handler=self.hide_mtl)
         
     def hide_mtl(self):
         self.screen.hide_m()
@@ -473,6 +516,11 @@ class BaseMode(DMMode):
         self.screen.show_timer()
         self.screen.show_ball()
         self.mtl_shown = False
+        
+    def update_lamps(self):
+        
+        if self.game.current_player().extra_balls > 0:
+            self.game.lamps.shootAgain.pulse(0)
         
     def _dec_global_timer(self):
         self.game.current_player().timer -= 1

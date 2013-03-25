@@ -28,3 +28,7 @@ keyboard_switch_map:
     y: chaseCar2
     h: chaseCar1
     m: mtlM
+    u: leftRampExit
+    j: rightRampExit
+    i: elevatorHold
+    o: eject

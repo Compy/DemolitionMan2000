@@ -447,7 +447,7 @@ class DMDSpriteFont(object):
             
             
 class Sprite:
-    def __init__(self, parent, file_name, file_type, num_frames, int_padding = 1, scale=(1,1,1), fps = 60, pos=(0,0,0)):
+    def __init__(self, parent, file_name, file_type, num_frames, int_padding = 1, scale=(1,1,1), fps = 60, pos=(0,0,0), auto_gc = True):
         self.textures = self.loadTextureMovie(num_frames, file_name, file_type, int_padding)
         self.plane = base.loader.loadModel('assets/models/plane')
         self.plane.setPos(pos[0],pos[1],pos[2])         #set its position
@@ -460,6 +460,7 @@ class Sprite:
         self.currentLoop = 0
         self.lastFrame = 0
         self.trash = False
+        self.auto_gc = auto_gc
         
         if base.displayFlipped:
             self.plane.setAttrib(CullFaceAttrib.make(CullFaceAttrib.MCullCounterClockwise))
@@ -486,9 +487,9 @@ class Sprite:
     def reparentTo(self, node):
         self.plane.reparentTo(node)
         
-    def show(self):
+    def show(self, loops = 0):
         self.plane.show()
-        self.play(0)
+        self.play(loops)
         
     def hide(self):
         self.plane.hide()
@@ -541,7 +542,8 @@ class Sprite:
         #print "Current Frame: " + str(currentFrame % len(self.textures)) + ", Last Frame " + str(self.lastFrame)
         
         if (currentFrame % len(self.textures)) < self.lastFrame and self.loops == 1:
-            self.trash = True
+            if self.auto_gc:
+                self.trash = True
             return Task.done
         
         self.lastFrame = currentFrame % len(self.textures)
@@ -562,7 +564,8 @@ class Sprite:
         if self.loops > 0 and (currentFrame % len(self.textures)) == len(self.textures) - 1:
             self.currentLoop += 1
             if self.currentLoop >= self.loops:
-                self.trash = True
+                if self.auto_gc:
+                    self.trash = True
                 return Task.done
         return Task.cont          #Continue the task indefinitely
 
