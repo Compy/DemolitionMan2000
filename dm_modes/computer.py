@@ -25,6 +25,10 @@ class ComputerMode(DMMode):
                        ('Mystery Mode', None),
                        ('Mystery Mode', None),
                        ('Mystery Mode', None),
+                       #('Increase Bonus X', None),
+                       #('Increase Bonus X', None),
+                       #('Call For Backup', None),
+                       #('Call For Backup', None)
                        #('Maximize Freezes', 'computer_max_freezes'),
                        #('Collect Bonus', 'computer_max_freezes'), #FIXME
                        #('Collect Standups', 'computer_max_freezes'),
@@ -62,7 +66,7 @@ class ComputerMode(DMMode):
         base.screenManager.showScreen("computer", False)
         #self.game.sound.set_music_volume(0.2)
         self.game.sound.play("computer_award", fade_music=True)
-        self.award = self.computer_awards[random.randrange(0,len(self.computer_awards) - 1)]
+        self.select_award()
         
         self.cancel_delayed('say_computer_award')
         self.delay(name='say_computer_award', event_type=None, delay=2.1, handler=self.announce_award)
@@ -70,12 +74,24 @@ class ComputerMode(DMMode):
         self.delay(name='end_computer', event_type=None, delay=4, handler=self.end_computer)
         self.award_in_progress = True
     
+    def select_award(self):
+        self.award = self.computer_awards[random.randrange(0,len(self.computer_awards) - 1)]
+        if self.award[0] == "Light Arrows" and self.game.current_player().light_arrows:
+            self.select_award()
+            
+        if self.award[0] == "Mystery Mode" and self.game.current_player().wtsa:
+            self.select_award()
+        
+        if self.award[0] == "Extra Ball Lit" and self.game.current_player().extraball_lit:
+            self.select_award()
+    
     def announce_award(self):
         self.logger.info("announce_award::Computer awards " + self.award[0])
         if self.award[1] != None:
             self.game.sound.play(self.award[1], fade_music=True)
         
         if self.award[0] == "Light Arrows":
+            self.game.current_player().light_arrows = True
             self.game.current_player().arrow_loop = True
             self.game.current_player().arrow_left_ramp = True
             self.game.current_player().arrow_acmag = True
@@ -94,9 +110,19 @@ class ComputerMode(DMMode):
             
         if self.award[0] == "Mystery Mode":
             self.game.current_player().computer_lit = False
+            self.game.current_player().wtsa = True
             self.game.modes.add(self.game.wtsa)
             self.game.modes.remove(self)
-
+        
+        if self.award[0] == "3X Car Crash":
+            pass
+        
+        if self.award[0] == "Extra Ball Lit":
+            self.game.current_player().extraball_lit = True
+            self.game.lamps.extraBall.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)
+            
+        if self.award[0] == "Increase Bonus X":
+            self.game.current_player().bonus_x += 1
     
     def update_lamps(self):
         if self.game.current_player().computer_lit:

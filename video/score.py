@@ -65,7 +65,7 @@ class ScoreScreen(GameScreen):
         
         modInfo = self.place_model(model_name = "spinner.egg",
                          scale = (0.1, 0.2, 0.2),
-                         pos = (-25,120,-30),
+                         pos = (-23,120,-30),
                          rotate = False,
                          p = 7,
                          h = 15,

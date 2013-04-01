@@ -28,7 +28,7 @@ class AttractScreenBase(GameScreen):
         '''
         super(AttractScreenBase, self).__init__(screen_manager, name)
         
-        self._creditText=OnscreenText("Credits: 0      Insert Coin",
+        self._creditText=OnscreenText("FREE PLAY         PRESS START",
                                        1,
                                        font=base.fontLoader.load('digital.ttf'),
                                        fg=(1,1,1,1),
@@ -147,6 +147,7 @@ class DMIntroScreen(AttractScreenBase):
         super(DMIntroScreen, self).hide()
         if self.tex != None:
             self.tex.setTime(0)
+
 class HighScoreDisplay(AttractScreenBase):
     def __init__(self, screen_manager):
         super(HighScoreDisplay, self).__init__(screen_manager, "attract_demo3")
@@ -204,9 +205,57 @@ class HighScoreDisplay(AttractScreenBase):
         i = 0
         for score in high_scores:
             self._playerInitials[i].setText(score.inits)
-            self._playerScores[i].setText(str(locale.format("%d", score.score, grouping=True)))
+            self._playerScores[i].setText(str(base.format_score(score.score)))
             i += 1
 
+class ThanksDisplay(AttractScreenBase):
+    def __init__(self, screen_manager):
+        super(ThanksDisplay, self).__init__(screen_manager, "attract_demo5")
+        
+        
+        self.title=OnscreenText("Special Thanks",
+                                       1,
+                                       font=base.fontLoader.load('arial.ttf'),
+                                       fg=(1,1,1,1),
+                                       pos=(0,0.85),
+                                       align=TextNode.ACenter,
+                                       scale=.1,
+                                       mayChange=False,
+                                       parent=self.node2d)
+        
+        namelist = "";
+        namelist += "Matt Kiser & Eve B.\n\n\n"
+        namelist += "Mike Compton\n\n"
+        namelist += "Alana Maxey\n\n\n"
+        namelist += "Jerad Poff\n\n\n"
+        namelist += "Pinsiders Everywhere!"
+        
+        self.names=OnscreenText(namelist,
+                                       1,
+                                       font=base.fontLoader.load('arial.ttf'),
+                                       fg=(1,0,0,1),
+                                       pos=(-1.2,0.75),
+                                       align=TextNode.ALeft,
+                                       scale=.08,
+                                       mayChange=False,
+                                       parent=self.node2d)
+        
+        accomplishments = ""
+        accomplishments += "Cabinet artwork and head design. Many thanks for all of the\ncreative ideas and input into the gameplay that these two had.\n\n"
+        accomplishments += "Cabinet construction, pizza and spirits! (and a hell of a nice guy!)\n\n"
+        accomplishments += "Listening to my nerdy (and sometimes enraged) rants about \nputting this thing together!\n\n"
+        accomplishments += "Lugging this stupid machine up a flight of stairs\nand benchpressing it while I put the legs on.\n\n"
+        accomplishments += "All of your critique and support for putting ideas into the game!\n\n\n"
+        self.accomplishments=OnscreenText(accomplishments,
+                                       1,
+                                       font=base.fontLoader.load('arial.ttf'),
+                                       fg=(1,1,1,1),
+                                       pos=(-1,0.65),
+                                       align=TextNode.ALeft,
+                                       scale=.08,
+                                       mayChange=False,
+                                       parent=self.node2d)
+        
 class GameScoreDisplay(AttractScreenBase):
     def __init__(self, screen_manager):
         super(GameScoreDisplay, self).__init__(screen_manager, "attract_demo4")
@@ -309,11 +358,15 @@ class GameScoreDisplay(AttractScreenBase):
     def show(self):
         super(GameScoreDisplay, self).show()
         scores = base.hwgame.game_data['PreviousScores']
+        num = 0
         for i in range(len(scores)):
             if scores[i] == 0:
                 self._scoreNodes[str(i+1)].setText("00")
             else:
-                self._scoreNodes[str(i+1)].setText(str(locale.format("%d", scores[i], grouping=True)))
+                self._scoreNodes[str(i+1)].setText(str(base.format_score(scores[i])))
+                num += 1
+                
+        self.showPlayerScores(num)
             
         
     def hidePlayerScores(self, starting_at = 1):

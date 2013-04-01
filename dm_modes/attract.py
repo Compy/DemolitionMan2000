@@ -17,9 +17,11 @@ class AttractMode(DMMode):
     '''
     
     screen_rotation = [
+                       ['attract5', 20.0],
                        ['attract4', 10.0],
                        ['attract1', 5.5],
                        ['attract2', 16.0],
+                       ['attract5', 20.0],
                        ['attract3', 5.0],
                        ['attract4', 5.0]
                       ]

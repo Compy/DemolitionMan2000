@@ -31,4 +31,4 @@ keyboard_switch_map:
     u: leftRampExit
     j: rightRampExit
     i: elevatorHold
-    o: eject
+    o: upperLeftFlipperGate

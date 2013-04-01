@@ -4,6 +4,7 @@ import logging
 from procgame import *
 from functools import partial
 from dmmode import DMMode
+import random
 
 class BaseMode(DMMode):
     def __init__(self, game):
@@ -261,6 +262,21 @@ class BaseMode(DMMode):
         self.game.coils.ejectFlasher.schedule(schedule=0x0000aaaa, cycle_seconds=1, now=True)
         
     def sw_bottomPopper_active_for_250ms(self, sw):
+        
+        if not self.game.current_player().computer_lit and not self.game.current_player().arrow_subway:
+            base.screenManager.showModalMessage(
+                                                message = "Explode Lamp Added",
+                                                time = 2.0,
+                                                scale = 0.2,
+                                                font = "eurostile.ttf",
+                                                bg=(0,0,0,1),
+                                                fg=(1,1,1,1),
+                                                frame_color=(0,0,1,1),
+                                                blink_speed = 0.015,
+                                                blink_color = (0,0,0,1)
+                                                )
+            self.game.explode.add_explode_lamp()
+        
         if self.game.current_player().arrow_subway:
             self.do_laser_millions()
             self.game.current_player().arrow_subway = False
@@ -271,6 +287,7 @@ class BaseMode(DMMode):
         if self.game.current_player().computer_lit:
             self.game.computer.start_award()
             return
+        
         self.release_bottomPopper()
         self.logger.info("Ejecting bottom popper")
         
@@ -521,6 +538,21 @@ class BaseMode(DMMode):
         
         if self.game.current_player().extra_balls > 0:
             self.game.lamps.shootAgain.pulse(0)
+            
+    def random_lamp_effect(self):
+        schedule = [0x0000f0f0,0x0000e0e0,0x0000ff0f,0x0000eeee,0x00000e0e,0x00000f0f]
+        flashers = ['clawFlasher','jetsFlasher','sideRampFlasher','leftRampUpFlasher',
+                    'leftRampLwrFlasher','carChaseCenterFlasher','carChaseLowerFlasher',
+                    'rightRampFlasher','ejectFlasher','carChaseUpFlasher','lowerReboundFlasher',
+                    'eyeBallFlasher','centerRampFlasher','divertorFlasher','rightRampUpFlasher']
+        for lamp in self.game.lamps:
+            lamp.schedule(schedule=random.choice(schedule), cycle_seconds=1, now=True)
+            
+        for flasher in flashers:
+            self.game.coils[flasher].schedule(schedule=random.choice(schedule), cycle_seconds=1, now=True)
+            
+        self.delay('restore_lamps', event_type=None, delay=0.8, handler=self.game.update_lamps)
+        self.delay('gi_on', event_type=None, delay=0.5, handler=self.game.gi_on)
         
     def _dec_global_timer(self):
         self.game.current_player().timer -= 1

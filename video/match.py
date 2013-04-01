@@ -13,7 +13,7 @@ from direct.interval.IntervalGlobal import *
 from direct.interval.LerpInterval import LerpFunc
 from panda3d.core import *
 from direct.showbase.DirectObject import DirectObject
-import os, sys, locale
+import os, sys, locale, random
 
 class MatchScreen(GameScreen):
 
@@ -57,13 +57,17 @@ class MatchScreen(GameScreen):
         self.imgs = []
         
     def set_digits(self, digits):
+        print "SET DIGITS " + str(digits)
         dtext = ""
         for d in digits:
+            print "DIGITS " + str(d)
             dtext += str(d) + "\n"
             
+        print "DTEXT " + dtext
+                    
         self.digits.setText(dtext)
             
-            
+        self.digits.show()
             
             
         #self.anim_sequence.append(LerpFunc(self.fade_text_in, fromData=0, toData=1.0, duration=0.4, blendType='easeIn', extraArgs=[name_text,(1,0,0,1)]))
@@ -84,7 +88,6 @@ class MatchScreen(GameScreen):
         self.start_animation()
         self.drop_idx = 0
         self.match.setText("")
-        self.digits.setText("")
         for img in self.imgs:
             img.destroy()
             
@@ -127,7 +130,12 @@ class MatchScreen(GameScreen):
         base.taskMgr.doMethodLater(0.5, self.showMatchNumber, 'match_show')
         
     def showMatchNumber(self,task):
-        self.match.setText("70")
+        random_match = random.randint(0,90)
+        if random_match < 10:
+            r = str(random_match) + "0"
+        else:
+            r = str(random_match)
+        self.match.setText(r)
         return Task.done
         
         

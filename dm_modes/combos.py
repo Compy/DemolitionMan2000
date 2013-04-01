@@ -14,7 +14,7 @@ class ComboMode(DMMode):
     BLINK_SLOW = 0xf0f0f0f0
     BLINK_FAST = 0xbbbbbbbb
     
-    COMBO_COMPUTER = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
+    COMBO_COMPUTER = [2,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     COMBO_EXTRABALL = [15,45]
     
     LOCATION_SUBWAY = (0.3261,0,-0.4973)
@@ -63,7 +63,7 @@ class ComboMode(DMMode):
             if self.can_blink_right_ramp: self.game.lamps.rightRampArrow.schedule(schedule=self.BLINK_SLOW,cycle_seconds=0,now=True)
             if self.can_blink_center_ramp: self.game.lamps.centerRampArrow.schedule(schedule=self.BLINK_SLOW,cycle_seconds=0,now=True)
             
-            self.delay(name="right_slow", event_type=None, delay=2, handler=self.blink_right, param=ComboLampState.FAST)
+            self.delay(name="right_slow", event_type=None, delay=4, handler=self.blink_right, param=ComboLampState.FAST)
         elif rate == ComboLampState.FAST:
             if self.can_blink_right_loop: self.game.lamps.rightLoopArrow.schedule(schedule=self.BLINK_FAST,cycle_seconds=0,now=True)
             if self.can_blink_right_ramp: self.game.lamps.rightRampArrow.schedule(schedule=self.BLINK_FAST,cycle_seconds=0,now=True)
@@ -84,7 +84,7 @@ class ComboMode(DMMode):
             if self.can_blink_side_scoop: self.game.lamps.undergroundArrow.schedule(schedule=self.BLINK_SLOW, cycle_seconds=0, now=True)
             if self.can_blink_side_ramp: self.game.lamps.sideRampArrow.schedule(schedule=self.BLINK_SLOW, cycle_seconds=0, now = True)
             
-            self.delay(name="side_slow", event_type=None, delay=2, handler=self.blink_side, param=ComboLampState.FAST)
+            self.delay(name="side_slow", event_type=None, delay=4, handler=self.blink_side, param=ComboLampState.FAST)
             
         elif rate == ComboLampState.FAST:
             if self.can_blink_side_scoop: self.game.lamps.undergroundArrow.schedule(schedule=self.BLINK_FAST, cycle_seconds=0, now=True)
@@ -107,7 +107,7 @@ class ComboMode(DMMode):
             if self.can_blink_left_ramp: self.game.lamps.leftRampArrow.schedule(schedule=self.BLINK_SLOW,cycle_seconds=0,now=True)
             if self.can_blink_center_ramp: self.game.lamps.centerRampArrow.schedule(schedule=self.BLINK_SLOW,cycle_seconds=0,now=True)
             
-            self.delay(name="left_slow", event_type=None, delay=2, handler=self.blink_left, param=ComboLampState.FAST)
+            self.delay(name="left_slow", event_type=None, delay=4, handler=self.blink_left, param=ComboLampState.FAST)
         elif rate == ComboLampState.FAST:
             if self.can_blink_left_loop: self.game.lamps.leftLoopArrow.schedule(schedule=self.BLINK_FAST,cycle_seconds=0,now=True)
             if self.can_blink_left_ramp: self.game.lamps.leftRampArrow.schedule(schedule=self.BLINK_FAST,cycle_seconds=0,now=True)

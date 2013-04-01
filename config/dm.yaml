@@ -209,10 +209,13 @@ PRSwitches:
 PRCoils:
     flipperLwRMain:
         number: FLRM
+        pulseTime: 32
     flipperLwRHold:
         number: FLRH
+        pulseTime: 32
     flipperLwLMain:
         number: FLLM
+        pulseTime: 32
     flipperLwLHold:
         number: C32
     divertorMain:

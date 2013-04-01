@@ -25,9 +25,10 @@ class MatchMode(DMMode):
         for p in self.game.players:
             digits.append(str(p.score)[-2:-1] + "0")
             
-        base.display_queue.put_nowait(partial(self.screen.set_digits, digits))
+        base.display_queue.put_nowait(partial(self.screen.set_digits, digits=digits))
         
         print digits
+        #self.screen.set_digits(digits)
         
         base.screenManager.showScreen("match", hideOthers=True, hideScore=True)
         

@@ -118,4 +118,11 @@ class DMPlayer(game.Player):
         self.arrow_side_ramp = False
         self.arrow_right_ramp = False
         self.arrow_right_loop = False
+        self.light_arrows = False
+        self.wtsa = False
+        
+        self.explode_leftloop = False
+        self.explode_leftramp = False
+        self.explode_rightramp = False
+        self.explode_rightloop = False
         

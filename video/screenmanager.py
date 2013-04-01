@@ -10,7 +10,7 @@ import random
 from panda3d.core import PandaNode, TextNode
 from boot import BootScreen
 from service import MainMenu, DiagnosticsMenu, TestMainMenu, UpdateCode, ThreeDPlacement, Flashers, Switches, Log
-from attract import PCCScreen, DMIntroScreen, HighScoreDisplay, GameScoreDisplay
+from attract import PCCScreen, DMIntroScreen, HighScoreDisplay, GameScoreDisplay, ThanksDisplay
 from bonus import BonusScreen
 from blocks import BlocksScreen
 from skillshot import SkillShotScreen
@@ -104,6 +104,7 @@ class ScreenManager(object):
         self.screens['attract2'] = DMIntroScreen(self)
         self.screens['attract3'] = HighScoreDisplay(self)
         self.screens['attract4'] = GameScoreDisplay(self)
+        self.screens['attract5'] = ThanksDisplay(self)
         self.screens['blocks'] = BlocksScreen(self)
         self.screens['skillshot'] = SkillShotScreen(self)
         self.screens['score'] = ScoreScreen(self)

@@ -11,13 +11,14 @@ import yaml
 import traceback
 import procgame
 import threading
+import random
 
 from procgame import *
 from procgame.highscore import *
 from procgame.modes import BallSave, Trough, BallSearch
 from procgame.game import BasicPinboxGame
 from dm_modes import elevator, boot, attract, blocks, skillshot, basemode, status, bonus, claw, combos, carcrash, sanangeles
-from dm_modes import computer, acmag, match, carchase
+from dm_modes import computer, acmag, match, carchase, wizardblocks, explode
 from pinbox import service
 from player import DMPlayer
 import pinproc
@@ -46,6 +47,7 @@ class HWGame(BasicPinboxGame):
         self.playback = (len(sys.argv) > 1 and 'playback' in sys.argv)
         self.SIMULATE = video.SIMULATE
         self.video = video
+        self.is_wb = False
         
         if self.fakePinProc:
             if self.playback:
@@ -124,6 +126,7 @@ class HWGame(BasicPinboxGame):
         self.skill_shot_mode = skillshot.SkillShotMode(self)
         self.combo_mode = combos.ComboMode(self)
         self.base_game_mode = basemode.BaseMode(self)
+        self.wizardblocks = wizardblocks.WizardBlocksMode(self)
         self.bonus = bonus.BonusMode(self)
         self.status_display_mode = status.StatusDisplayMode(self)
         self.claw = claw.ClawMode(self)
@@ -131,6 +134,7 @@ class HWGame(BasicPinboxGame):
         self.acmag = acmag.AcmagMode(self)
         self.match = match.MatchMode(self)
         self.carcrash = carcrash.CarCrashMode(self)
+        self.explode = explode.ExplodeMode(self)
         self.wtsa = sanangeles.SanAngelesMode(self)
         self.car_chase = carchase.CarChaseMode(self)
         ## SERVICE MODES AND SUBMODES ##
@@ -185,8 +189,8 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("jet", "assets/sfx/jet_1.wav")
         self.sound.register_sound("jet", "assets/sfx/jet_2.wav")
         self.sound.register_sound("jet", "assets/sfx/jet_3.wav")
-        self.sound.register_sound("explode", "assets/sfx/explode_1.wav")
-        self.sound.register_sound("explode", "assets/sfx/explode_2.wav")
+        #self.sound.register_sound("explode", "assets/sfx/explode_1.wav")
+        #self.sound.register_sound("explode", "assets/sfx/explode_2.wav")
         self.sound.register_sound("explode", "assets/sfx/explode_3.wav")
         self.sound.register_sound("player1", "assets/speech/comp_player1.wav")
         self.sound.register_sound("player2", "assets/speech/comp_player2.wav")
@@ -256,6 +260,8 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("spartan_push", "assets/speech/spartan_push.wav")
         self.sound.register_sound("spartan_scream", "assets/speech/spartan_scream.wav")
         self.sound.register_sound("spartan_yeah", "assets/speech/spartan_yeah.wav")
+        self.sound.register_sound("sparkle", "assets/sfx/sparkle.wav")
+        self.sound.register_sound("wb_bang", "assets/sfx/wb_bang.wav")
         
         logging.info("Loading music")
         #self.sound.register_music("main", "assets/music/mainplay.wav")
@@ -272,6 +278,7 @@ class HWGame(BasicPinboxGame):
         self.sound.register_music("match", "assets/music/match.wav")
         self.sound.register_music("wtsa", "assets/music/wtsa.wav")
         self.sound.register_music("chase", "assets/music/chase.ogg")
+        self.sound.register_music("wb", "assets/music/wb.ogg")
         
         ##
         ## MUSIC
@@ -317,10 +324,16 @@ class HWGame(BasicPinboxGame):
     def ball_starting(self):
         logging.info("Ball starting")
         super(HWGame, self).ball_starting()
+        
+        if self.is_wb:
+            self.modes.add(self.wizardblocks)
+            return
+        
         self.modes.add(self.base_game_mode)
         self.modes.add(self.skill_shot_mode)
         self.modes.add(self.combo_mode)
         self.modes.add(self.carcrash)
+        self.modes.add(self.explode)
         
         base.messenger.send("update_ball", [self.ball])
         
@@ -409,6 +422,7 @@ class HWGame(BasicPinboxGame):
         self.modes.remove(self.combo_mode)
         self.modes.remove(self.acmag)
         self.modes.remove(self.carcrash)
+        self.modes.remove(self.explode)
         if self.current_player().computer_lit:
             self.modes.remove(self.computer)
         if self.current_player().sanangeles_in_progress:
@@ -562,6 +576,8 @@ class HWGame(BasicPinboxGame):
     
     def drain_callback(self):
         pass
+    
+        
     
     def shoot_again(self):
         base.screenManager.showModalMessage(
