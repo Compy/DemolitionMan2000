@@ -81,7 +81,13 @@ class ScoreScreen(GameScreen):
                                  image="assets/images/laser_millions.png",     # File name specified
                                  pos=(0,0,-2),                              # z: -2 is off screen at the bottom
                                  scale=(0.3,0.3,0.3))                         # Scale it down a bit horizontally and vertically to make it look right
+        self.standup_collected = OnscreenImage(
+                                 parent=self.node2d,                        # Parented to our 2d node renderer
+                                 image="assets/images/standup_spotted.png",     # File name specified
+                                 pos=(0,0,-2),                              # z: -2 is off screen at the bottom
+                                 scale=(0.6,0.3,0.4))                         # Scale it down a bit horizontally and vertically to make it look right
 
+        
         
         self.mtlM = Sprite(
                                 parent=self.node, 
@@ -219,6 +225,34 @@ class ScoreScreen(GameScreen):
                      LerpPosInterval(self.laser_millions,
                         0.7,
                         pos=(-3,0,0.7),
+                        blendType='easeIn'
+                     )
+             )
+        # Fire off the sequence
+        s.start()
+        
+    def show_standup_collected(self):
+        # Load our trunk bonus image, parent it to our 2d renderer
+        
+        # We must also enable transparency on the image otherwise we get big ugly black squares
+        self.standup_collected.setTransparency(TransparencyAttrib.MAlpha)
+        
+        # Set up a sequence to perform the animation in, pause and out... "sequentially"
+        s = Sequence(
+                     # Lerp stands for "linearly interpolate", so we move from one position to the other with
+                     # an 'easeOut' blend so it comes to a nice slow stop at the end instead of an abrupt finish
+                     LerpPosInterval(self.standup_collected,
+                        0.7,
+                        pos=(0,0,0),
+                        startPos=(-3,0,0),
+                        blendType='easeOut'
+                     ),
+                     # Pause the sequence for 2.5 seconds
+                     Wait(2.5),
+                     # Animate back to our home position (off screen) with an ease in so it starts moving gradually
+                     LerpPosInterval(self.standup_collected,
+                        0.7,
+                        pos=(-3,0,0),
                         blendType='easeIn'
                      )
              )

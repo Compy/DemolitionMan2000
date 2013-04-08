@@ -7,21 +7,21 @@ from dmmode import DMMode
 
 class ComputerMode(DMMode):
     computer_awards = [
-                       #('Extra Ball Lit', 'computer_light_eb'),
+                       ('Extra Ball Lit', 'computer_light_eb'),
                        #('Light Explode', 'computer_explode_activated'),
                        #('Light Explode', 'computer_explode_activated'),
                        #('Light Explode', 'computer_explode_activated'),
                        #('Light Explode', 'computer_explode_activated'),
                        #('Light Explode', 'computer_explode_activated'),
-                       #('3X Car Crash', 'computer_triple_car_crash'),
-                       #('3X Car Crash', 'computer_triple_car_crash'),
-                       #('3X Car Crash', 'computer_triple_car_crash'),
+                       ('3X Car Crash', 'computer_triple_car_crash'),
+                       ('3X Car Crash', 'computer_triple_car_crash'),
+                       ('3X Car Crash', 'computer_triple_car_crash'),
                        #('2X Retina Scan', 'computer_double_retina_scan'),
                        #('2X Retina Scan', 'computer_double_retina_scan'),
                        #('2X Retina Scan', 'computer_double_retina_scan'),
-                       #('Light Arrows', 'computer_light_arrows'),
-                       #('Light Arrows', 'computer_light_arrows'),
-                       #('Light Arrows', 'computer_light_arrows'),
+                       ('Light Arrows', 'computer_light_arrows'),
+                       ('Light Arrows', 'computer_light_arrows'),
+                       ('Light Arrows', 'computer_light_arrows'),
                        ('Mystery Mode', None),
                        ('Mystery Mode', None),
                        ('Mystery Mode', None),
@@ -31,10 +31,10 @@ class ComputerMode(DMMode):
                        #('Call For Backup', None)
                        #('Maximize Freezes', 'computer_max_freezes'),
                        #('Collect Bonus', 'computer_max_freezes'), #FIXME
-                       #('Collect Standups', 'computer_max_freezes'),
-                       #('Collect Standups', 'computer_max_freezes'),
-                       #('Collect Standups', 'computer_max_freezes'),
-                       #('Collect Standups', 'computer_max_freezes')
+                       ('Collect Standups', 'computer_max_freezes'),
+                       ('Collect Standups', 'computer_max_freezes'),
+                       ('Collect Standups', 'computer_max_freezes'),
+                       ('Collect Standups', 'computer_max_freezes')
                        ]
     def __init__(self, game):
         super(ComputerMode, self).__init__(game, 11)

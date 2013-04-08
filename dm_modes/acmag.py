@@ -4,6 +4,7 @@ import logging
 import random
 from procgame import *
 from dmmode import DMMode
+from functools import partial
 
 class AcmagMode(DMMode):
     score_color_switch = False
@@ -63,12 +64,15 @@ class AcmagMode(DMMode):
     def toggle_score_color(self):
         self.score_color_switch = not self.score_color_switch
         
+        base.display_queue.put_nowait(partial(self._do_color_toggle))
+            
+        self.delay(name='acmag_blink_score', event_type=None, delay=0.45, handler=self.toggle_score_color)
+        
+    def _do_color_toggle(self):
         if self.score_color_switch:
             base.screenManager.getScreen("score").set_score_color((1,1,1,1))
         else:
             base.screenManager.getScreen("score").set_score_color((1,0,0,1))
-            
-        self.delay(name='acmag_blink_score', event_type=None, delay=0.45, handler=self.toggle_score_color)
         
     def sw_rightRampEnter_active(self, sw):
         if self.switch_ignores['right_enter'] or not self.screen.explode_right():

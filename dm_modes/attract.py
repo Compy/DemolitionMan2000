@@ -6,6 +6,7 @@ Created on Dec 19, 2012
 import procgame
 import pinproc
 import logging
+import os
 from procgame import *
 from dmmode import DMMode
 
@@ -17,7 +18,6 @@ class AttractMode(DMMode):
     '''
     
     screen_rotation = [
-                       ['attract5', 20.0],
                        ['attract4', 10.0],
                        ['attract1', 5.5],
                        ['attract2', 16.0],
@@ -30,6 +30,8 @@ class AttractMode(DMMode):
     def __init__(self, game):
         super(AttractMode, self).__init__(game, 3)
         self.logger = logging.getLogger("Attract")
+        self.shutdown_launch = False
+        self.shutdown_buyin = False
         
     def mode_started(self):
         self.logger.info("Starting attract mode")
@@ -48,7 +50,7 @@ class AttractMode(DMMode):
         self.game.lampController.stop_show()
         
     def rotate_screens(self):
-        
+        os.system("xscreensaver-command -deactivate")
         self.logger.info("Current screen idx %s" % str(self.current_screen_idx))
         if self.current_screen_idx >= len(self.screen_rotation) - 1:
             self.current_screen_idx = 0
@@ -106,6 +108,29 @@ class AttractMode(DMMode):
                                             blink_speed = 0.3,
                                             blink_color = (1,1,0,1),
                                             frame_blink_color = (0,0,0,1))
+        
+    def sw_ballLaunch_active_for_5s(self, sw):
+        if not self.game.switches.coinDoor.is_active():
+            self.shutdown_launch = True
+            self.check_shutdown()
+    
+    def sw_buyIn_active_for_5s(self, sw):
+        if not self.game.switches.coinDoor.is_active():
+            self.shutdown_buyin = True
+            self.check_shutdown()
+        
+    def check_shutdown(self):
+        self.cancel_delayed('cancel_shutdown')
+        if self.shutdown_buyin and self.shutdown_launch:
+            logging.critical("Got shutdown key combination")
+            os.system("shutdown now -h")
+        else:
+            logging.critical("check_shutdown() Shutdown canceled (not ready)")
+            self.delay('cancel_shutdown', event_type=None, delay=6, handler=self.cancel_shutdown)
+    
+    def cancel_shutdown(self):
+        self.shutdown_buyin = False
+        self.shutdown_launch = False
     
     def sw_enter_active(self, sw):
         self.game.modes.remove(self)

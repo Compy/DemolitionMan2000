@@ -167,6 +167,7 @@ class ScreenManager(object):
         self.logger.info("Showing screen %s Thread %s" % (screen_name, str(threading.current_thread().getName())))
         
     def hideScreen(self, screen_name):
+        self.logger.info("screenmanager::hideScreen %s" % (screen_name))
         base.display_queue.put_nowait(partial(self._thread_safe_hideScreen, screen_name = screen_name))
         
     def hideAllScreens(self):
@@ -333,6 +334,9 @@ class ScreenManager(object):
     def clearModalMessages(self):
         for modal_name in self.modal_screens.copy():
             self.hideModalMessage(modal_name)
+            
+    def isModalBeingShown(self):
+        return len(self.modal_screens) > 0
         
     def _hideModalMessage(self, modal_name):
         self.hideModalMessage(modal_name)

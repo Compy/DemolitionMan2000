@@ -52,10 +52,13 @@ from video.utils import FontLoader, PandaKeyboard
 from panda3d.core import WindowProperties, TextNode
 from direct.showbase.PythonUtil import *
 
-
-logging.basicConfig(level=logging.INFO,
-                    #filename='system.log',
-                    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+if not SIMULATE:
+    logging.basicConfig(level=logging.INFO,
+                        filename='system.log',
+                        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+else:
+        logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
 import os
@@ -93,6 +96,7 @@ class PinboxApp(ShowBase):
         # *** Setup title 
         wp = WindowProperties() 
         wp.setTitle("Pinbox") 
+        wp.setCursorHidden(True)
         base.win.requestProperties(wp) 
         
         self.sprites = []

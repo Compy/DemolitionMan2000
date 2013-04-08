@@ -5,8 +5,12 @@ from procgame import *
 from functools import partial
 from dmmode import DMMode
 import random
+import os
 
 class BaseMode(DMMode):
+    BLINK_SLOW = 0xf0f0f0f0
+    BLINK_FAST = 0xbbbbbbbb
+    
     def __init__(self, game):
         super(BaseMode, self).__init__(game, 10)
         self.logger = logging.getLogger("BaseMode")
@@ -14,6 +18,7 @@ class BaseMode(DMMode):
         self.ignore_switches['right_ramp'] = False
         self.ignore_switches['left_ramp'] = False
         self.mtl_shown = False
+        self.quick_freeze_lit = False
         
         
     def mode_started(self):
@@ -58,6 +63,13 @@ class BaseMode(DMMode):
         
         base.screenManager.showScreen("score")
         self.mtl_shown = False
+        self.quick_freeze_lit = False
+        
+        self.delay('stop_screensaver', event_type=None, delay=300, handler=self.stop_screensaver)
+    
+    def stop_screensaver(self):
+        os.system("xscreensaver-command -deactivate")
+        self.delay('stop_screensaver', event_type=None, delay=300, handler=self.stop_screensaver)
     
     def ball_drained_callback(self):
         if self.game.ball_save.is_active():
@@ -111,6 +123,7 @@ class BaseMode(DMMode):
         # Deactivate the ball search logic so it won't search due to no
         # switches being hit.
         #self.game.ball_search.disable()
+        self.cancel_delayed('quick_freeze')
 
     def finish_ball(self):
         #self.game.sound.fadeout_music()
@@ -144,6 +157,19 @@ class BaseMode(DMMode):
         
     def unignore_switch(self, switch):
         self.ignore_switches[switch] = False
+        
+    def light_quick_freeze(self, speed = "slow"):
+        if speed == "slow":
+            self.quick_freeze_lit = True
+            self.game.lamps.quickFreeze.schedule(schedule=self.BLINK_SLOW,cycle_seconds=0,now=True)
+            self.delay("quick_freeze", event_type=None, delay=4, handler=self.light_quick_freeze, param="fast")
+        elif speed == "fast":
+            self.quick_freeze_lit = True
+            self.game.lamps.quickFreeze.schedule(schedule=self.BLINK_FAST,cycle_seconds=0,now=True)
+            self.delay("quick_freeze", event_type=None, delay=3, handler=self.light_quick_freeze, param="off")
+        elif speed == "off":
+            self.quick_freeze_lit = False
+            self.game.lamps.quickFreeze.disable()
     
     def sw_phantomSwitch_active(self,sw):
         if not self.game.SIMULATE: return
@@ -343,6 +369,9 @@ class BaseMode(DMMode):
             self.game.sound.play("gunshots")
             self.ball_saved = False
             
+        if self.game.wtsa.is_started():
+            self.game.coils.ballLaunch.pulse(50)
+            
     def sw_shooterLane_open_for_1s(self, sw):
         if self.ball_starting:
             self.ball_starting = False
@@ -353,6 +382,8 @@ class BaseMode(DMMode):
         
     def sw_rightInlane_active(self, sw):
         self.game.sound.play("inlane")
+        if self.game.current_player().quick_freeze:
+            self.light_quick_freeze("slow")
     
     def sw_leftOutlane_active(self, sw):
         if not self.ball_saved:
@@ -425,6 +456,12 @@ class BaseMode(DMMode):
             self.do_laser_millions()
             self.game.current_player().arrow_left_ramp = False
             self.game.lamps.leftRampArrow.disable()
+            
+        if self.quick_freeze_lit:
+            self.quick_freeze_lit = False
+            self.game.current_player().quick_freeze = False
+            self.game.lamps.lightQuickFreeze.disable()
+            self.game.sound.play("freeze")
         
     def sw_upperLeftFlipperGate_active(self, sw):
         self.screen.spin_spinner()
@@ -440,6 +477,10 @@ class BaseMode(DMMode):
             self.do_laser_millions()
             self.game.current_player().arrow_side_ramp = False
             self.game.lamps.sideRampArrow.disable()
+            
+        else:
+            if not base.screenManager.isModalBeingShown():
+                base.screenManager.getScreen("score").show_standup_collected()
             
     def sw_rightRampExit_active(self, sw):
         if self.game.current_player().arrow_right_ramp:
@@ -525,6 +566,95 @@ class BaseMode(DMMode):
             self.mtl_shown = True
                 
             self.delay('hide_mtl', event_type=None, delay=5, handler=self.hide_mtl)
+            
+        if self.game.current_player().mlit and \
+            self.game.current_player().tlit and \
+            self.game.current_player().llit:
+            self.game.current_player().mlit = False
+            self.game.current_player().tlit = False
+            self.game.current_player().llit = False
+            self.game.sound.play("mtl_complete")
+            self.game.current_player().bonus_x += 1
+            # PLAY SPRITE ANIMATION
+        
+    def sw_standUp1_active(self, sw):
+        self.game.lamps.standup1.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
+        self.delay('standup_1', delay=1, handler=self.game.lamps.standup1.pulse, param=0)
+        self.game.sound.play("sparkle")
+        
+        if not self.game.current_player().standup1:
+            self.game.current_player().standup1 = True
+        
+        self.game.score(1400)
+        self.check_standups()
+    
+    def sw_standUp2_active(self, sw):
+        self.game.lamps.standup2.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
+        self.delay('standup_2', delay=1, handler=self.game.lamps.standup2.pulse, param=0)
+        self.game.sound.play("sparkle")
+        
+        if not self.game.current_player().standup2:
+            self.game.current_player().standup2 = True
+            
+        self.game.score(1400)
+        self.check_standups()
+    
+    def sw_standUp3_active(self, sw):
+        self.game.lamps.standup3.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
+        self.delay('standup_3', delay=1, handler=self.game.lamps.standup3.pulse, param=0)
+        self.game.sound.play("sparkle")
+        
+        if not self.game.current_player().standup3:
+            self.game.current_player().standup3 = True
+            
+        self.game.score(1400)
+        self.check_standups()
+    
+    def sw_standUp4_active(self, sw):
+        self.game.lamps.standup4.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
+        self.delay('standup_4', delay=1, handler=self.game.lamps.standup4.pulse, param=0)
+        self.game.sound.play("sparkle")
+        
+        if not self.game.current_player().standup4:
+            self.game.current_player().standup4 = True
+            
+        self.game.score(1400)
+        self.check_standups()
+    
+    def sw_standUp5_active(self, sw):
+        self.game.lamps.standup5.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
+        self.delay('standup_5', delay=1, handler=self.game.lamps.standup5.pulse, param=0)
+        self.game.sound.play("sparkle")
+        
+        if not self.game.current_player().standup5:
+            self.game.current_player().standup5 = True
+            
+        self.game.score(1400)
+        self.check_standups()
+        
+    def check_standups(self):
+        if self.game.current_player().standup1 and \
+            self.game.current_player().standup2 and \
+            self.game.current_player().standup3 and \
+            self.game.current_player().standup4 and \
+            self.game.current_player().standup5:
+            
+            if not self.game.current_player().quick_freeze:
+                self.game.current_player().quick_freeze = True
+                self.game.sound.play("computer_quick_freeze_activated", fade_music=True)
+                self.game.lamps.lightQuickFreeze.pulse(0)
+            
+            self.game.current_player().standup1 = False
+            self.game.current_player().standup2 = False
+            self.game.current_player().standup3 = False
+            self.game.current_player().standup4 = False
+            self.game.current_player().standup5 = False
+            
+            self.game.lamps.standup1.disable()
+            self.game.lamps.standup2.disable()
+            self.game.lamps.standup3.disable()
+            self.game.lamps.standup4.disable()
+            self.game.lamps.standup5.disable()
         
     def hide_mtl(self):
         self.screen.hide_m()
@@ -536,8 +666,16 @@ class BaseMode(DMMode):
         
     def update_lamps(self):
         
+        self.game.restore_player_feature_lamps()
+        
         if self.game.current_player().extra_balls > 0:
             self.game.lamps.shootAgain.pulse(0)
+            
+        if self.game.current_player().standup1: self.game.lamps.standup1.pulse(0)
+        if self.game.current_player().standup2: self.game.lamps.standup2.pulse(0)
+        if self.game.current_player().standup3: self.game.lamps.standup3.pulse(0)
+        if self.game.current_player().standup4: self.game.lamps.standup4.pulse(0)
+        if self.game.current_player().standup5: self.game.lamps.standup5.pulse(0)
             
     def random_lamp_effect(self):
         schedule = [0x0000f0f0,0x0000e0e0,0x0000ff0f,0x0000eeee,0x00000e0e,0x00000f0f]

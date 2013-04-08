@@ -43,8 +43,10 @@ class SanAngelesMode(DMMode):
         self.game.base_game_mode.set_timer(30)
         self.game.base_game_mode.start_timer()
         self.screen.mode_started()
-        self.game.trough.launch_balls(2,stealth=True)
+        self.game.trough.launch_balls(2,stealth=False)
         self.game.ball_save.add(20.0, allow_multiple_saves=True)
+        self.game.ball_save.num_balls_to_save = 3
+        self.game.ball_save.allow_multiple_saves = True
     
     def mode_stopped(self):
         self.logger.info("WTSA mode complete")

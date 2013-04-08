@@ -61,7 +61,7 @@ class SkillShotMode(DMMode):
         # Skillshot obtained!
         self.game.current_player().player_stats['completed_skillshots'] += 1
         award = (self.game.current_player().player_stats['completed_skillshots']) * 5000000
-        self.game.score()
+        self.game.score(award)
         self.game.sound.play("skillshot")
         # Play some awesome sfx and speech
         

@@ -22,7 +22,7 @@ class BootMode(DMMode):
         if base.screenManager.getScreen('boot').getLoadingProgress() >= 100:
             self.boot_finish()
             return
-        base.screenManager.getScreen('boot').incLoadingProgress(90)
+        base.screenManager.getScreen('boot').incLoadingProgress(2)
         self.delay(name='boot_loader', event_type=None, delay=.1, handler=self.boot_progress)
         
     def boot_finish(self):

@@ -28,14 +28,15 @@ class BonusMode(DMMode):
         self.bonus_screen.clear_bonus_items()
         self.bonus_screen.add_bonus_item("Headshots", 15, True)
         self.bonus_screen.add_bonus_item("Ricochets", 24, True)
-        self.bonus_screen.add_bonus_item("Explosions", 20, True)
+        self.bonus_screen.add_bonus_item("Explosions", self.game.current_player().explosions, True)
         if self.game.current_player().player_stats['combos'] > 0:
             self.bonus_screen.add_bonus_item("Combos", self.game.current_player().player_stats['combos'], True)
         
         if self.game.current_player().bonus_x > 1:
             self.bonus_screen.add_bonus_item("Multiplier", self.game.current_player().bonus_x, True)
             
-        total = self.game.current_player().player_stats['combos'] * 500000
+        total = self.game.current_player().player_stats['combos'] * 250000
+        total += self.game.current_player().explosions * 40000
         total = total * self.game.current_player().bonus_x
         
         self.total = total
@@ -43,6 +44,7 @@ class BonusMode(DMMode):
         self.bonus_screen.add_bonus_item("Total", total, True)
         base.screenManager.showScreen("bonus", False)
         self.bonus_screen.start_animation()
+        self.game.current_player().explosions = 0
     
     def mode_stopped(self):
         self.logger.info("Bonus mode complete")

@@ -17,18 +17,19 @@ keyboard_switch_map:
     n: shooterLane
     a: coinDoor
     k: leftOutlane
-    l: leftInlane
     r: rightInlane
     p: bottomPopper
     w: leftRampEnter
     e: rightSlingshot
     c: centerRamp
     q: rightRampEnter
-    t: topPopper
     y: chaseCar2
     h: chaseCar1
     m: mtlM
+    t: mtlT
+    l: mtlL
     u: leftRampExit
     j: rightRampExit
+    x: sideRampExit
     i: elevatorHold
-    o: upperLeftFlipperGate
+    o: buyIn

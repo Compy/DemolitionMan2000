@@ -262,6 +262,7 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("spartan_yeah", "assets/speech/spartan_yeah.wav")
         self.sound.register_sound("sparkle", "assets/sfx/sparkle.wav")
         self.sound.register_sound("wb_bang", "assets/sfx/wb_bang.wav")
+        self.sound.register_sound("mtl_complete", "assets/speech/mtl_complete.wav")
         
         logging.info("Loading music")
         #self.sound.register_music("main", "assets/music/mainplay.wav")
@@ -350,12 +351,9 @@ class HWGame(BasicPinboxGame):
     def restore_player_feature_lamps(self):
         logging.info("Restoring feature lamps")
         
-        self.disable_all_lamps()
         p = self.current_player()
-        if p.computer_lit:
-            self.modes.add(self.computer)
+
         if p.claw_lit:
-            self.open_divertor()
             self.lamps.clawReady.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)
         if p.access_claw_lit:
             self.lamps.accessClaw.pulse(0)
@@ -375,6 +373,18 @@ class HWGame(BasicPinboxGame):
             self.lamps.topRollOver.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)
         if p.llit:
             self.lamps.lowerRollOver.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)
+            
+        if p.quick_freeze:
+            self.lamps.lightQuickFreeze.pulse(0)
+            
+        if p.freeze1:
+            self.lamps.freeze1.pulse(0)
+        if p.freeze2:
+            self.lamps.freeze2.pulse(0)
+        if p.freeze3:
+            self.lamps.freeze3.pulse(0)
+        if p.freeze4:
+            self.lamps.freeze4.pulse(0)
         
         
         if p.arrow_loop:

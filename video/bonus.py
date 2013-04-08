@@ -46,7 +46,7 @@ class BonusScreen(GameScreen):
                                        scale=.15,
                                        mayChange=True,
                                        parent=self.node2d)
-        score_text=OnscreenText(str(locale.format("%d", score, grouping=True)),
+        score_text=OnscreenText(str(base.format_score(score)),
                                        1,
                                        font=base.fontLoader.load('motorwerk.ttf'),
                                        pos=(1.2,ypos),

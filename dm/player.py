@@ -39,11 +39,18 @@ class DMPlayer(game.Player):
         self.standup5 = False
         self.retina_scan_ready = True
         self.quick_freeze = False
-        self.access_claw_lit = True
+        self.access_claw_lit = False
         self.claw_lit = False
         self.timer = 0
+        self.explosions = 0
         self.bonus_x = 1
         self.sanangeles_in_progress = False
+        
+        self.freeze1 = True
+        self.freeze2 = True
+        self.freeze3 = True
+        self.freeze4 = False
+        
         # Check modes that have already been played
         
         '''
