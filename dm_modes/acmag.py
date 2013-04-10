@@ -49,6 +49,7 @@ class AcmagMode(DMMode):
             self.game.current_player().acmag_percentage = 60
             
     def ball_drained(self):
+        if self.game.trough.num_balls_in_play > 0: return
         self.cancel_delayed('acmag_blink_score')
         base.screenManager.hideScreen("acmag")
         

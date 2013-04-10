@@ -16,9 +16,9 @@ class ComputerMode(DMMode):
                        ('3X Car Crash', 'computer_triple_car_crash'),
                        ('3X Car Crash', 'computer_triple_car_crash'),
                        ('3X Car Crash', 'computer_triple_car_crash'),
-                       #('2X Retina Scan', 'computer_double_retina_scan'),
-                       #('2X Retina Scan', 'computer_double_retina_scan'),
-                       #('2X Retina Scan', 'computer_double_retina_scan'),
+                       ('2X Retina Scan', 'computer_double_retina_scan'),
+                       ('2X Retina Scan', 'computer_double_retina_scan'),
+                       ('2X Retina Scan', 'computer_double_retina_scan'),
                        ('Light Arrows', 'computer_light_arrows'),
                        ('Light Arrows', 'computer_light_arrows'),
                        ('Light Arrows', 'computer_light_arrows'),
@@ -34,7 +34,10 @@ class ComputerMode(DMMode):
                        ('Collect Standups', 'computer_max_freezes'),
                        ('Collect Standups', 'computer_max_freezes'),
                        ('Collect Standups', 'computer_max_freezes'),
-                       ('Collect Standups', 'computer_max_freezes')
+                       ('Collect Standups', 'computer_max_freezes'),
+                       ('250,000', None),
+                       ('500,000', None),
+                       ('1,000,000', None)
                        ]
     def __init__(self, game):
         super(ComputerMode, self).__init__(game, 11)
@@ -92,7 +95,7 @@ class ComputerMode(DMMode):
         
         if self.award[0] == "Light Arrows":
             self.game.current_player().light_arrows = True
-            self.game.current_player().arrow_loop = True
+            self.game.current_player().arrow_left_loop = True
             self.game.current_player().arrow_left_ramp = True
             self.game.current_player().arrow_acmag = True
             self.game.current_player().arrow_subway = True
@@ -116,6 +119,15 @@ class ComputerMode(DMMode):
         
         if self.award[0] == "3X Car Crash":
             pass
+        
+        if self.award[0] == "250,000":
+            self.game.score(250000)
+            
+        if self.award[0] == "500,000":
+            self.game.score(500000)
+            
+        if self.award[0] == "1,000,000":
+            self.game.score(1000000)
         
         if self.award[0] == "Extra Ball Lit":
             self.game.current_player().extraball_lit = True

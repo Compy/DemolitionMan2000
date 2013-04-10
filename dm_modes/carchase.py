@@ -190,4 +190,5 @@ class CarChaseMode(DMMode):
         self.game.modes.remove(self)
         
     def ball_drained(self):
+        if self.game.trough.num_balls_in_play > 0: return
         self.game.modes.remove(self)

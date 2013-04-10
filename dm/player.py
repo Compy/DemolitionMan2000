@@ -37,7 +37,7 @@ class DMPlayer(game.Player):
         self.standup3 = False
         self.standup4 = False
         self.standup5 = False
-        self.retina_scan_ready = True
+        self.retina_scan_ready = False
         self.quick_freeze = False
         self.access_claw_lit = False
         self.claw_lit = False
@@ -118,7 +118,7 @@ class DMPlayer(game.Player):
         self.cryoprison_multiball = False
         self.cryoprison_multiball_lit = False
         
-        self.arrow_loop = False
+        self.arrow_left_loop = False
         self.arrow_left_ramp = False
         self.arrow_acmag = False
         self.arrow_subway = False

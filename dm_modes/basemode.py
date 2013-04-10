@@ -66,6 +66,11 @@ class BaseMode(DMMode):
         self.quick_freeze_lit = False
         
         self.delay('stop_screensaver', event_type=None, delay=300, handler=self.stop_screensaver)
+        self.delay('update_bip', event_type=None, delay=1, handler=self.update_bip)
+    
+    def update_bip(self):
+        self.screen.set_bip(self.game.trough.num_balls_in_play)
+        self.delay('update_bip', event_type=None, delay=1, handler=self.update_bip)
     
     def stop_screensaver(self):
         os.system("xscreensaver-command -deactivate")
@@ -81,8 +86,8 @@ class BaseMode(DMMode):
             self.stop_timer()
             self.game.current_player().timer = 0
             
-            for mode in self.game.modes:
-                mode.ball_drained()
+        for mode in self.game.modes:
+            mode.ball_drained()
             
     def ball_save_callback(self):
         #anim = dmd.Animation().load(game_path+"dmd/eternal_life.dmd")
@@ -112,7 +117,10 @@ class BaseMode(DMMode):
             self.game.ball_save.start_lamp()
             #start background music
             #print("Debug - Starting General Play Music")
-            self.game.sound.play_music('ball_wait_start', -1)
+            if not self.game.current_player().multiball_lit:
+                self.game.sound.play_music('ball_wait_start', -1)
+            else:
+                self.game.sound.play_music('fortressmb', -1)
             #self.game.sound.play_music('chase',-1)
     
     def mode_stopped(self):
@@ -242,7 +250,7 @@ class BaseMode(DMMode):
     
     def add_acmag_percentage(self):
         # If the player has already completed acmag, ignore it
-        if self.game.current_player().acmag: return
+        if self.game.current_player().acmag or self.game.fortress.is_started(): return
         
         if self.game.current_player().acmag_percentage < 100:
             self.game.current_player().acmag_percentage += 5
@@ -332,10 +340,20 @@ class BaseMode(DMMode):
             self.game.lamps.extraBall.disable()
             self.game.lamps.shootAgain.pulse(0)
             self.game.current_player().extraball_lit = False
-        else:
-            self.game.coils.topPopper.pulse()
+            return
+        
+        if self.game.current_player().multiball_lit:
+            self.game.modes.add(self.game.fortress)
+            return
+        
+        self.game.coils.topPopper.pulse()
             
     def post_extraball_release(self):
+        
+        if self.game.current_player().multiball_lit:
+            self.game.modes.add(self.game.fortress)
+            return
+        
         self.game.gi_on()
         self.game.sound.play("explode")
         self.game.coils.topPopper.pulse()
@@ -355,7 +373,10 @@ class BaseMode(DMMode):
             self.game.lamps.gi05.schedule(schedule=0x55555555, cycle_seconds=0, now=True)
             self.delay(name='gi_reactivate', event_type=None, delay=0.3, handler=self.game.gi_on)
             self.game.sound.play("explode")
-            self.game.sound.play_music('main',-1)
+            
+            if not self.game.current_player().multiball_lit:
+                self.game.sound.play_music('main',-1)
+            
             self.game.lampController.save_state('base')
             self.game.lampController.play_show("ball_launch", 
                                                repeat=False,
@@ -369,7 +390,8 @@ class BaseMode(DMMode):
             self.game.sound.play("gunshots")
             self.ball_saved = False
             
-        if self.game.wtsa.is_started():
+        if self.game.wtsa.is_started() or \
+            self.game.fortress.is_started():
             self.game.coils.ballLaunch.pulse(50)
             
     def sw_shooterLane_open_for_1s(self, sw):
@@ -386,7 +408,7 @@ class BaseMode(DMMode):
             self.light_quick_freeze("slow")
     
     def sw_leftOutlane_active(self, sw):
-        if not self.ball_saved:
+        if not self.ball_saved and self.game.trough.num_balls_in_play == 1:
             self.stop_timer()
             self.game.sound.play_music("drain")
             self.game.bonus_preemptive = True
@@ -395,7 +417,7 @@ class BaseMode(DMMode):
             self.game.bonus_preemptive = False
         
     def sw_rightOutlane_active(self, sw):
-        if not self.ball_saved:
+        if not self.ball_saved and self.game.trough.num_balls_in_play == 1:
             self.stop_timer()
             self.game.sound.play_music("drain")
             self.game.bonus_preemptive = True
@@ -462,6 +484,26 @@ class BaseMode(DMMode):
             self.game.current_player().quick_freeze = False
             self.game.lamps.lightQuickFreeze.disable()
             self.game.sound.play("freeze")
+            self.check_multiball()
+            
+    def check_multiball(self):
+        p = self.game.current_player()
+        
+        if not p.freeze1:
+            p.freeze1 = True
+        elif not p.freeze2:
+            p.freeze2 = True
+        elif not p.freeze3:
+            p.freeze3 = True
+        elif not p.freeze4:
+            p.freeze4 = True
+        
+        if p.freeze1 and p.freeze2 and p.freeze3 and p.freeze4:
+            # get mb ready
+            p.multiball_lit = True
+            self.game.sound.play_music("mb_ready",-1)
+        
+        self.update_lamps()
         
     def sw_upperLeftFlipperGate_active(self, sw):
         self.screen.spin_spinner()
@@ -580,7 +622,7 @@ class BaseMode(DMMode):
     def sw_standUp1_active(self, sw):
         self.game.lamps.standup1.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_1', delay=1, handler=self.game.lamps.standup1.pulse, param=0)
-        self.game.sound.play("sparkle")
+        self.game.sound.play("standup")
         
         if not self.game.current_player().standup1:
             self.game.current_player().standup1 = True
@@ -591,7 +633,7 @@ class BaseMode(DMMode):
     def sw_standUp2_active(self, sw):
         self.game.lamps.standup2.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_2', delay=1, handler=self.game.lamps.standup2.pulse, param=0)
-        self.game.sound.play("sparkle")
+        self.game.sound.play("standup")
         
         if not self.game.current_player().standup2:
             self.game.current_player().standup2 = True
@@ -602,7 +644,7 @@ class BaseMode(DMMode):
     def sw_standUp3_active(self, sw):
         self.game.lamps.standup3.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_3', delay=1, handler=self.game.lamps.standup3.pulse, param=0)
-        self.game.sound.play("sparkle")
+        self.game.sound.play("standup")
         
         if not self.game.current_player().standup3:
             self.game.current_player().standup3 = True
@@ -613,7 +655,7 @@ class BaseMode(DMMode):
     def sw_standUp4_active(self, sw):
         self.game.lamps.standup4.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_4', delay=1, handler=self.game.lamps.standup4.pulse, param=0)
-        self.game.sound.play("sparkle")
+        self.game.sound.play("standup")
         
         if not self.game.current_player().standup4:
             self.game.current_player().standup4 = True
@@ -624,7 +666,7 @@ class BaseMode(DMMode):
     def sw_standUp5_active(self, sw):
         self.game.lamps.standup5.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_5', delay=1, handler=self.game.lamps.standup5.pulse, param=0)
-        self.game.sound.play("sparkle")
+        self.game.sound.play("standup")
         
         if not self.game.current_player().standup5:
             self.game.current_player().standup5 = True
@@ -639,7 +681,7 @@ class BaseMode(DMMode):
             self.game.current_player().standup4 and \
             self.game.current_player().standup5:
             
-            if not self.game.current_player().quick_freeze:
+            if not self.game.current_player().quick_freeze and not self.game.current_player().multiball_lit:
                 self.game.current_player().quick_freeze = True
                 self.game.sound.play("computer_quick_freeze_activated", fade_music=True)
                 self.game.lamps.lightQuickFreeze.pulse(0)
@@ -676,6 +718,18 @@ class BaseMode(DMMode):
         if self.game.current_player().standup3: self.game.lamps.standup3.pulse(0)
         if self.game.current_player().standup4: self.game.lamps.standup4.pulse(0)
         if self.game.current_player().standup5: self.game.lamps.standup5.pulse(0)
+        
+        p = self.game.current_player()
+        
+        if p.freeze1 and p.freeze2 and p.freeze3 and p.freeze4:
+            # get mb ready
+            p.multiball_lit = True
+            self.game.lamps.freeze1.schedule(schedule=0xff00ff00, cycle_seconds=0, now=True)
+            self.game.lamps.freeze2.schedule(schedule=0xff00ff00, cycle_seconds=0, now=True)
+            self.game.lamps.freeze3.schedule(schedule=0xff00ff00, cycle_seconds=0, now=True)
+            self.game.lamps.freeze4.schedule(schedule=0xff00ff00, cycle_seconds=0, now=True)
+            
+            self.game.lamps.fortressMultiball.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)
             
     def random_lamp_effect(self):
         schedule = [0x0000f0f0,0x0000e0e0,0x0000ff0f,0x0000eeee,0x00000e0e,0x00000f0f]

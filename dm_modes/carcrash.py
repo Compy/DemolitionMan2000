@@ -57,7 +57,8 @@ class CarCrashMode(DMMode):
         self.delay('unignore_top_car', event_type=None, delay=3, handler=self.unignore_top)
         self.game.sound.play("crash")
         
-        if not self.game.car_chase.is_started() and not self.game.current_player().car_chase:
+        if not self.game.car_chase.is_started() and not self.game.current_player().car_chase \
+        and not self.game.fortress.is_started():
             self.game.modes.add(self.game.car_chase)
             
     

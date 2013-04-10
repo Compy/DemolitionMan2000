@@ -51,6 +51,7 @@ from video.screenmanager import ScreenManager
 from video.utils import FontLoader, PandaKeyboard
 from panda3d.core import WindowProperties, TextNode
 from direct.showbase.PythonUtil import *
+import traceback
 
 if not SIMULATE:
     logging.basicConfig(level=logging.INFO,
@@ -60,6 +61,13 @@ else:
         logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
+
+def global_exception_handler(ex_cls, ex, tb):
+    logging.critical("UNCAUGHT EXCEPTION:")
+    logging.critical(''.join(traceback.format_tb(tb)))
+    logging.critical('{0}: {1}'.format(ex_cls, ex))
+    
+sys.excepthook = global_exception_handler
 
 import os
 from dm import hwcontroller

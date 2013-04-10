@@ -18,7 +18,7 @@ from procgame.highscore import *
 from procgame.modes import BallSave, Trough, BallSearch
 from procgame.game import BasicPinboxGame
 from dm_modes import elevator, boot, attract, blocks, skillshot, basemode, status, bonus, claw, combos, carcrash, sanangeles
-from dm_modes import computer, acmag, match, carchase, wizardblocks, explode
+from dm_modes import computer, acmag, match, carchase, wizardblocks, explode, multiball
 from pinbox import service
 from player import DMPlayer
 import pinproc
@@ -137,6 +137,7 @@ class HWGame(BasicPinboxGame):
         self.explode = explode.ExplodeMode(self)
         self.wtsa = sanangeles.SanAngelesMode(self)
         self.car_chase = carchase.CarChaseMode(self)
+        self.fortress = multiball.FortressMultiball(self)
         ## SERVICE MODES AND SUBMODES ##
         self.service = service.ServiceMainMenu(self)
         self.service_diagnostics = service.ServiceDiagnosticsMenu(self)
@@ -217,6 +218,9 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("extraball", "assets/sfx/extraball_music.wav")
         self.sound.register_sound("mtl_whoosh", "assets/sfx/mtl_whoosh.wav")
         self.sound.register_sound("dontmove", "assets/speech/spartan_dontmove.wav")
+        self.sound.register_sound("maniac", "assets/speech/maniac.ogg")
+        
+        self.sound.register_sound("standup", "assets/sfx/standup.wav")
         
         
         self.sound.register_sound("tires", "assets/sfx/tires.wav")
@@ -263,6 +267,8 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("sparkle", "assets/sfx/sparkle.wav")
         self.sound.register_sound("wb_bang", "assets/sfx/wb_bang.wav")
         self.sound.register_sound("mtl_complete", "assets/speech/mtl_complete.wav")
+        self.sound.register_sound("jackpot", "assets/speech/jackpot.wav")
+        
         
         logging.info("Loading music")
         #self.sound.register_music("main", "assets/music/mainplay.wav")
@@ -280,6 +286,8 @@ class HWGame(BasicPinboxGame):
         self.sound.register_music("wtsa", "assets/music/wtsa.wav")
         self.sound.register_music("chase", "assets/music/chase.ogg")
         self.sound.register_music("wb", "assets/music/wb.ogg")
+        self.sound.register_music("fortressmb", "assets/music/fortressmb.ogg")
+        self.sound.register_music("mb_ready", "assets/music/mb_ready.wav")
         
         ##
         ## MUSIC
@@ -341,6 +349,9 @@ class HWGame(BasicPinboxGame):
         p = self.current_player()
         base.messenger.send("update_score", [p.name, p.score])
         
+        if p.computer_lit:
+            self.modes.add(self.computer)
+        
         self.restore_player_feature_lamps()
         
         if len(self.players) > 1:
@@ -387,7 +398,7 @@ class HWGame(BasicPinboxGame):
             self.lamps.freeze4.pulse(0)
         
         
-        if p.arrow_loop:
+        if p.arrow_left_loop:
             self.lamps.leftLoopArrow.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)   
         if p.arrow_right_ramp:
             self.lamps.rightRampArrow.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)

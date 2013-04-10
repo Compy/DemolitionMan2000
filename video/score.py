@@ -63,6 +63,14 @@ class ScoreScreen(GameScreen):
                                        mayChange=True,
                                        parent=self.node2d)
         
+        self.bip = OnscreenText("BIP: 0",
+                                1,
+                                fg=(1,1,1,1),
+                                pos=(-1.2,0.92),
+                                scale=.1,
+                                mayChange=True,
+                                parent=self.node2d)
+        
         modInfo = self.place_model(model_name = "spinner.egg",
                          scale = (0.1, 0.2, 0.2),
                          pos = (-23,120,-30),
@@ -282,3 +290,7 @@ class ScoreScreen(GameScreen):
         
     def hide_retina(self):
         self.retina.hide()
+        
+    def set_bip(self,bip):
+        self.bip.setText("BIP: " + str(bip))
+        
