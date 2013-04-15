@@ -43,13 +43,19 @@ class DMPlayer(game.Player):
         self.claw_lit = False
         self.timer = 0
         self.explosions = 0
+        self.top_popper_shots = 0
         self.bonus_x = 1
         self.sanangeles_in_progress = False
+        self.call_for_backup = False
+        self.super_jets = False
+        self.super_jets_left = 25
         
         self.freeze1 = True
         self.freeze2 = True
         self.freeze3 = True
         self.freeze4 = False
+        self.retina_value = 5000000
+        self.retina_scans = 0
         
         # Check modes that have already been played
         

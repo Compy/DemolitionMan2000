@@ -104,7 +104,7 @@ class PinboxApp(ShowBase):
         # *** Setup title 
         wp = WindowProperties() 
         wp.setTitle("Pinbox") 
-        wp.setCursorHidden(True)
+        wp.setCursorHidden(False)
         base.win.requestProperties(wp) 
         
         self.sprites = []
@@ -199,6 +199,11 @@ class PinboxApp(ShowBase):
                 del s
                 
         return Task.again
+ 
+    def show_mouse_cursor(self, show):
+        props = WindowProperties()
+        props.setCursorHidden(not show)
+        base.win.requestProperties(props)
  
     def check_display_queue(self, task):
         if self.do_exit:

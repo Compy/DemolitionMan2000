@@ -36,14 +36,16 @@ class FortressMultiball(DMMode):
         self.delay('play_maniac', event_type=None, delay=1, handler=self.play_maniac)
         
         self.game.trough.launch_balls(1,stealth=False)
-        self.game.ball_save.add(10.0, allow_multiple_saves=True)
+        self.game.ball_save.add(20.0, allow_multiple_saves=True)
         self.game.ball_save.num_balls_to_save = 2
         self.game.ball_save.allow_multiple_saves = True
         
         if self.game.switches.topPopper.is_active():
-            self.game.coils.topPopper.pulse()
+            self.delay('top_pulse', event_type=None, delay=3, handler=self.game.coils.topPopper.pulse)
         
         self.update_lamps()
+        
+        self.game.close_divertor()
         
     def increment_jackpot(self):
         self.jackpot_score += 500000
@@ -102,6 +104,15 @@ class FortressMultiball(DMMode):
             self.game.sound.play("explode",fade_music=True)
             self.game.base_game_mode.random_lamp_effect()
             self.game.score(self.jackpot_score)
+            base.screenManager.showModalMessage(
+                                            message="JACKPOT AWARDED\n" + str(self.jackpot_score), 
+                                            modal_name="jackpot", 
+                                            fg=(1,0,0,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            time = 2)
             self.increment_jackpot()
             self.update_jackpot()
             
@@ -111,6 +122,15 @@ class FortressMultiball(DMMode):
             self.game.sound.play("explode",fade_music=True)
             self.game.base_game_mode.random_lamp_effect()
             self.game.score(self.jackpot_score)
+            base.screenManager.showModalMessage(
+                                            message="JACKPOT AWARDED\n" + str(self.jackpot_score), 
+                                            modal_name="jackpot", 
+                                            fg=(1,0,0,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            time = 2)
             self.increment_jackpot()
             self.update_jackpot()
             
@@ -120,6 +140,15 @@ class FortressMultiball(DMMode):
             self.game.sound.play("explode",fade_music=True)
             self.game.base_game_mode.random_lamp_effect()
             self.game.score(self.jackpot_score)
+            base.screenManager.showModalMessage(
+                                            message="JACKPOT AWARDED\n" + str(self.jackpot_score), 
+                                            modal_name="jackpot", 
+                                            fg=(1,0,0,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            time = 2)
             self.increment_jackpot()
             self.update_jackpot()
             
@@ -129,6 +158,15 @@ class FortressMultiball(DMMode):
             self.game.sound.play("explode",fade_music=True)
             self.game.base_game_mode.random_lamp_effect()
             self.game.score(self.jackpot_score)
+            base.screenManager.showModalMessage(
+                                            message="JACKPOT AWARDED\n" + str(self.jackpot_score), 
+                                            modal_name="jackpot", 
+                                            fg=(1,0,0,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            time = 2)
             self.increment_jackpot()
             self.update_jackpot()
             
@@ -138,6 +176,15 @@ class FortressMultiball(DMMode):
             self.game.sound.play("explode",fade_music=True)
             self.game.base_game_mode.random_lamp_effect()
             self.game.score(self.jackpot_score)
+            base.screenManager.showModalMessage(
+                                            message="JACKPOT AWARDED\n" + str(self.jackpot_score), 
+                                            modal_name="jackpot", 
+                                            fg=(1,0,0,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            time = 2)
             self.increment_jackpot()
             self.update_jackpot()
             
@@ -147,6 +194,15 @@ class FortressMultiball(DMMode):
             self.game.sound.play("explode",fade_music=True)
             self.game.base_game_mode.random_lamp_effect()
             self.game.score(self.jackpot_score)
+            base.screenManager.showModalMessage(
+                                            message="JACKPOT AWARDED\n" + str(self.jackpot_score), 
+                                            modal_name="jackpot", 
+                                            fg=(1,0,0,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            time = 2)
             self.increment_jackpot()
             self.update_jackpot()
             
@@ -156,6 +212,17 @@ class FortressMultiball(DMMode):
             self.game.sound.play("explode",fade_music=True)
             self.game.base_game_mode.random_lamp_effect()
             self.game.score(self.jackpot_score)
+            
+            base.screenManager.showModalMessage(
+                                            message="JACKPOT AWARDED\n" + str(self.jackpot_score), 
+                                            modal_name="jackpot", 
+                                            fg=(1,0,0,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            time = 2)
+            
             self.increment_jackpot()
             self.update_jackpot()
             
@@ -186,10 +253,29 @@ class FortressMultiball(DMMode):
         p.freeze3 = False
         p.freeze4 = False
         
+        self.game.lamps.centerRampJackpot.disable()
+        self.game.lamps.rightRampJackpot.disable()
+        self.game.lamps.rightLoopJackpot.disable()
+        self.game.lamps.leftRampJackpot.disable()
+        self.game.lamps.leftLoopJackpot.disable()
+        self.game.lamps.undergroundJackpot.disable()
+        self.game.lamps.sideRampJackpot.disable()
+        
+        self.game.lamps.undergroundArrow.disable()
+        self.game.lamps.leftRampArrow.disable()
+        self.game.lamps.sideRampArrow.disable()
+        self.game.lamps.leftLoopArrow.disable()
+        self.game.lamps.centerRampArrow.disable()
+        self.game.lamps.rightLoopArrow.disable()
+        self.game.lamps.rightRampArrow.disable()
+        
         if self.game.trough.num_balls_in_play > 0:
-            self.game.sound.play_music("main",-1)
+            self.game.play_music()
             self.game.update_lamps()
+            
+            if self.game.current_player().claw_lit:
+                self.game.open_divertor()
         
     def ball_drained(self):
-        if self.game.trough.num_balls_in_play == 1:
+        if self.game.trough.num_balls_in_play <= 1:
             self.game.modes.remove(self)

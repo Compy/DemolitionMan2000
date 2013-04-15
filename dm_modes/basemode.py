@@ -20,6 +20,8 @@ class BaseMode(DMMode):
         self.mtl_shown = False
         self.quick_freeze_lit = False
         
+        self.retina_scan_active = [0,1,2,4,7,10,13,16,19,21,24,27,30,33,36,39,41,44,47,50]
+        
         
     def mode_started(self):
         self.logger.info("Starting base mode...")
@@ -60,17 +62,15 @@ class BaseMode(DMMode):
         self.game.ball_save.callback = self.ball_save_callback
         
         self.screen = base.screenManager.getScreen("score")
+        self.extraball_screen = base.screenManager.getScreen("extraball")
         
         base.screenManager.showScreen("score")
         self.mtl_shown = False
         self.quick_freeze_lit = False
         
         self.delay('stop_screensaver', event_type=None, delay=300, handler=self.stop_screensaver)
-        self.delay('update_bip', event_type=None, delay=1, handler=self.update_bip)
+        self.current_ef_sound = 0
     
-    def update_bip(self):
-        self.screen.set_bip(self.game.trough.num_balls_in_play)
-        self.delay('update_bip', event_type=None, delay=1, handler=self.update_bip)
     
     def stop_screensaver(self):
         os.system("xscreensaver-command -deactivate")
@@ -214,6 +214,9 @@ class BaseMode(DMMode):
         
         self.show_mtl(False)
         
+    def sw_rightHandle_active(self, sw):
+        self.sw_flipperLwR_active(sw)
+        
     def sw_flipperLwR_closed_for_3s(self, sw):
         if not self.game.status_display_mode.is_started():
             self.game.modes.add(self.game.status_display_mode)
@@ -224,27 +227,46 @@ class BaseMode(DMMode):
             self.game.modes.add(self.game.status_display_mode)
             self.game.status_held_flipper = 'L'
             
+    def score_superjet(self):
+        self.game.sound.play("superjet")
+        self.game.score(1000000)
+        self.game.current_player().super_jets_left -= 1
+        
+        if self.game.current_player().super_jets_left <= 0:
+            self.game.current_player().super_jets = False
+            self.game.sound.play("computer_superjets_complete",fade_music=True)
+            
     def sw_leftJet_active(self, sw):
         self.show_mtl()
         self.add_acmag_percentage()
-        self.game.sound.play("jet")
-        self.game.score(510)
+        
+        if self.game.current_player().super_jets:
+            self.score_superjet()
+        else:
+            self.game.sound.play("jet")
+            self.game.score(510)
         self.game.coils.jetsFlasher.pulse(40)
         self.pause_timer(3)
         
     def sw_rightJet_active(self, sw):
         self.show_mtl()
         self.add_acmag_percentage()
-        self.game.sound.play("jet")
-        self.game.score(510)
+        if self.game.current_player().super_jets:
+            self.score_superjet()
+        else:
+            self.game.sound.play("jet")
+            self.game.score(510)
         self.game.coils.jetsFlasher.pulse(40)
         self.pause_timer(3)
         
     def sw_bottomJet_active(self, sw):
         self.show_mtl()
         self.add_acmag_percentage()
-        self.game.sound.play("jet")
-        self.game.score(510)
+        if self.game.current_player().super_jets:
+            self.score_superjet()
+        else:
+            self.game.sound.play("jet")
+            self.game.score(510)
         self.game.coils.jetsFlasher.pulse(40)
         self.pause_timer(3)
     
@@ -270,17 +292,37 @@ class BaseMode(DMMode):
                 base.screenManager.showModalMessage(message=p.name + " added", modal_name="player_add", bg=(0,0,1,1), time = 2)
             
     def sw_eject_active_for_100ms(self, sw):
+        self.game.current_player().retina_scans += 1
+        if not self.game.current_player().retina_scan_ready:
+            if self.game.current_player().retina_scans in self.retina_scan_active:
+                self.game.current_player().retina_scan_ready = True
+            self.game.score(110000)
+        else:
+            self.game.current_player().retina_scan_ready = False
+            self.game.score(self.game.current_player().retina_value)
+            self.game.current_player().retina_value += 3000000
+            if not self.game.current_player().claw_lit:
+                self.game.current_player().access_claw_lit = True
+            
+        self.update_lamps()
         self.game.coils.ejectFlasher.schedule(schedule=0xaaaaaaaa, cycle_seconds=1, now=True)
         self.delay('retina_eject', event_type=None, delay=3, handler=self.retina_eject)
         self.game.sound.play("retina")
-        self.screen.show_retina()
-        self.delay('retina_show', event_type=None, delay=1, handler=self.show_retina_text)
         
-    def show_retina_text(self):
+        self.screen.show_retina()
+        self.delay('retina_show', event_type=None, delay=1, handler=self.show_retina_text, param=not self.game.current_player().retina_scan_ready)
+        
+    def show_retina_text(self, is_accepted = False):
+        if is_accepted:
+            text = "SCAN\nACCEPTED"
+            color = (0,1,1,1)
+        else:
+            text = "SCAN\nDENIED"
+            color = (1,0,0,1)
         base.screenManager.showModalMessage(
-                                            message="SCAN\nDENIED", 
+                                            message=text, 
                                             modal_name="retina", 
-                                            fg=(0,1,1,1),
+                                            fg=color,
                                             frame_color=(0,0,0,0),
                                             blink_speed=0.25,
                                             blink_color=(0,0,0,0),
@@ -340,16 +382,50 @@ class BaseMode(DMMode):
             self.game.lamps.extraBall.disable()
             self.game.lamps.shootAgain.pulse(0)
             self.game.current_player().extraball_lit = False
+            base.screenManager.hideScreen("score")
+            base.screenManager.showScreen("extraball")
             return
         
         if self.game.current_player().multiball_lit:
             self.game.modes.add(self.game.fortress)
             return
         
+        self.game.current_player().top_popper_shots += 1
+        
+        if self.game.current_player().top_popper_shots == 2:
+            self.game.current_player().top_popper_shots = 0
+        
+            self.do_ef_bonus()
+        else:
+            # Do big points
+            self.game.score(1000000)
+            self.screen.set_award_text("BIG POINTS\n1,000,000")
+            self.screen.show_top_award()
+            self.game.sound.play('top_random_award', fade_music=True)
+            self.delay('random_award', event_type=None, delay=3, handler=self.end_big_points)
+            
+    def end_big_points(self):
+        self.screen.hide_top_award()
+        self.game.coils.topPopper.pulse()
+            
+    def do_ef_bonus(self):
+        self.screen.show_ef_bonus()
+        self.game.score(5000000)
+        self.delay('ef_bonus', event_type=None, delay=3, handler=self.end_ef_bonus)
+        
+        ef_sounds = ['leary_jello','leary_bacon','leary_cigar','leary_tbone']
+        self.game.sound.play(ef_sounds[self.current_ef_sound], fade_music=True)
+        self.current_ef_sound += 1
+        if self.current_ef_sound > len(ef_sounds) - 1:
+            self.current_ef_sound = 0
+    
+    def end_ef_bonus(self):
+        self.screen.hide_ef_bonus()
         self.game.coils.topPopper.pulse()
             
     def post_extraball_release(self):
-        
+        base.screenManager.hideScreen("extraball")
+        base.screenManager.showScreen("score")
         if self.game.current_player().multiball_lit:
             self.game.modes.add(self.game.fortress)
             return
@@ -401,6 +477,14 @@ class BaseMode(DMMode):
             
     def sw_leftInlane_active(self, sw):
         self.game.sound.play("inlane")
+        
+        if self.game.current_player().access_claw_lit and not self.game.fortress.is_started() \
+            and not self.game.wtsa.is_started():
+            self.game.current_player().claw_lit = True
+            self.game.current_player().access_claw_lit = False
+            self.game.sound.play("cryo_claw_activated", fade_music=True)
+            self.game.open_divertor()
+            self.update_lamps()
         
     def sw_rightInlane_active(self, sw):
         self.game.sound.play("inlane")
@@ -459,12 +543,14 @@ class BaseMode(DMMode):
             self.game.current_player().arrow_acmag = False
             self.game.lamps.centerRampArrow.disable()
         else:
+            self.game.coils.divertorFlasher.schedule(schedule=0x00005555, cycle_seconds=1, now=True)
             self.game.sound.play("acmag_hit")
         self.game.lampController.save_state('base')
         self.game.lampController.play_show("acmag",
                                            repeat=False,
                                            callback=self.game.update_lamps
                                            )
+        self.show_mtl()
     def sw_leftLoop_active(self, sw):
         self.game.score(600)
         self.pause_timer(2)
@@ -483,8 +569,13 @@ class BaseMode(DMMode):
             self.quick_freeze_lit = False
             self.game.current_player().quick_freeze = False
             self.game.lamps.lightQuickFreeze.disable()
-            self.game.sound.play("freeze")
-            self.check_multiball()
+            self.quick_freeze()
+            
+        self.game.score(2500)
+            
+    def quick_freeze(self):
+        self.game.sound.play("freeze")
+        self.check_multiball()
             
     def check_multiball(self):
         p = self.game.current_player()
@@ -509,6 +600,7 @@ class BaseMode(DMMode):
         self.screen.spin_spinner()
         self.game.sound.play_delayed(key = "spinner", loops = 20, delay = 0.05, callback = partial(self.game.score, 1000))
         self.delay('spinner_sound', event_type=None, delay=1.3, handler=self.play_spinner_sound, param=2)
+        self.show_mtl()
         
     def play_spinner_sound(self, level):
         if level == 2:
@@ -521,14 +613,35 @@ class BaseMode(DMMode):
             self.game.lamps.sideRampArrow.disable()
             
         else:
-            if not base.screenManager.isModalBeingShown():
+            if not base.screenManager.isModalBeingShown() and not self.game.skill_shot_mode.is_started():
                 base.screenManager.getScreen("score").show_standup_collected()
+            
+            self.delay('spot_standup', event_type=None, delay=1, handler=self.spot_standup)
+            
+    def spot_standup(self):
+        p = self.game.current_player()
+        if not p.standup1:
+            self.sw_standUp1_active(None)
+        elif not p.standup2:
+            self.sw_standUp2_active(None)
+        elif not p.standup3:
+            self.sw_standUp3_active(None)
+        elif not p.standup4:
+            self.sw_standUp4_active(None)
+        elif not p.standup5:
+            self.sw_standUp5_active(None)
+            
+        self.game.update_lamps()
+        
             
     def sw_rightRampExit_active(self, sw):
         if self.game.current_player().arrow_right_ramp:
             self.do_laser_millions()
             self.game.current_player().arrow_right_ramp = False
             self.game.lamps.rightRampArrow.disable()
+            
+        else:
+            self.game.score(2500)
         
     def sw_rightFreeway_active(self, sw):
         self.pause_timer(3)
@@ -538,7 +651,9 @@ class BaseMode(DMMode):
             self.game.lamps.rightLoopArrow.disable()
             return
             
+        self.show_mtl()
         self.game.sound.play("loop")
+        self.game.score(2500)
         
     def sw_rightRampEnter_active(self, sw):
         if self.ignore_switches["right_ramp"]: return
@@ -592,6 +707,8 @@ class BaseMode(DMMode):
         self.game.sound.play("mtl_whoosh")
         
     def show_mtl(self, extend_timer = True):
+        if not self.game.current_player().mlit and not self.game.current_player().tlit and not self.game.current_player().llit:
+            return
         self.screen.hide_timer()
         self.screen.hide_ball()
         self.screen.hide_m()
@@ -617,7 +734,17 @@ class BaseMode(DMMode):
             self.game.current_player().llit = False
             self.game.sound.play("mtl_complete")
             self.game.current_player().bonus_x += 1
-            # PLAY SPRITE ANIMATION
+            base.display_queue.put_nowait(partial(self.screen.update_hud))
+            base.screenManager.showModalMessage(
+                                            message="BONUS\n" + str(self.game.current_player().bonus_x) + "X", 
+                                            modal_name="bonus_increased",
+                                            font = "motorwerk.ttf",
+                                            fg=(1,1,1,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=0.030,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1), 
+                                            time = 2)
         
     def sw_standUp1_active(self, sw):
         self.game.lamps.standup1.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
@@ -629,6 +756,9 @@ class BaseMode(DMMode):
         
         self.game.score(1400)
         self.check_standups()
+        
+        if self.game.current_player().super_jets:
+            self.game.current_player().super_jets_left += 1
     
     def sw_standUp2_active(self, sw):
         self.game.lamps.standup2.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
@@ -640,6 +770,9 @@ class BaseMode(DMMode):
             
         self.game.score(1400)
         self.check_standups()
+        
+        if self.game.current_player().super_jets:
+            self.game.current_player().super_jets_left += 1
     
     def sw_standUp3_active(self, sw):
         self.game.lamps.standup3.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
@@ -651,6 +784,9 @@ class BaseMode(DMMode):
             
         self.game.score(1400)
         self.check_standups()
+        
+        if self.game.current_player().super_jets:
+            self.game.current_player().super_jets_left += 1
     
     def sw_standUp4_active(self, sw):
         self.game.lamps.standup4.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
@@ -662,6 +798,17 @@ class BaseMode(DMMode):
             
         self.game.score(1400)
         self.check_standups()
+        
+        if self.game.current_player().super_jets:
+            self.game.current_player().super_jets_left += 1
+        
+    def sw_eyeballStandup_active(self, sw):
+        self.game.current_player().retina_value += 5000030
+        self.game.current_player().retina_scan_ready = True
+        self.game.coils.eyeBallFlasher.schedule(schedule=0x0000aaaa, cycle_seconds=1, now=True)
+        self.game.score(1000000)
+        self.update_lamps()
+        
     
     def sw_standUp5_active(self, sw):
         self.game.lamps.standup5.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
@@ -673,6 +820,9 @@ class BaseMode(DMMode):
             
         self.game.score(1400)
         self.check_standups()
+        
+        if self.game.current_player().super_jets:
+            self.game.current_player().super_jets_left += 1
         
     def check_standups(self):
         if self.game.current_player().standup1 and \

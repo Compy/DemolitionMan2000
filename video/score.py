@@ -54,6 +54,23 @@ class ScoreScreen(GameScreen):
         self.clock = OnscreenImage(image = 'assets/images/time.png', pos = (0.78, 0, 0.93),
                                    parent=self.node2d,
                                    scale=.06)
+        
+        self.bonus2x = OnscreenImage(image = 'assets/images/2x.png', pos = (-1.2, 0, 0.93),
+                                   parent=self.node2d,
+                                   scale=.06)
+        self.bonus3x = OnscreenImage(image = 'assets/images/3x.png', pos = (-1.2, 0, 0.93),
+                                   parent=self.node2d,
+                                   scale=.06)
+        self.bonus4x = OnscreenImage(image = 'assets/images/4x.png', pos = (-1.2, 0, 0.93),
+                                   parent=self.node2d,
+                                   scale=.06)
+        self.bonus5x = OnscreenImage(image = 'assets/images/5x.png', pos = (-1.2, 0, 0.93),
+                                   parent=self.node2d,
+                                   scale=.06)
+        self.cfb = OnscreenImage(image = 'assets/images/cfb.png', pos = (-1.0, 0, 0.93),
+                                   parent=self.node2d,
+                                   scale=.06)
+        
         self.timer_text = OnscreenText("--",
                                        1,
                                        font=base.fontLoader.load('motorwerk.ttf'),
@@ -63,14 +80,6 @@ class ScoreScreen(GameScreen):
                                        mayChange=True,
                                        parent=self.node2d)
         
-        self.bip = OnscreenText("BIP: 0",
-                                1,
-                                fg=(1,1,1,1),
-                                pos=(-1.2,0.92),
-                                scale=.1,
-                                mayChange=True,
-                                parent=self.node2d)
-        
         modInfo = self.place_model(model_name = "spinner.egg",
                          scale = (0.1, 0.2, 0.2),
                          pos = (-23,120,-30),
@@ -78,6 +87,16 @@ class ScoreScreen(GameScreen):
                          p = 7,
                          h = 15,
                          reference = "spinner")
+        
+        self.random_award_text=OnscreenText("",
+                                       1,
+                                       font=base.fontLoader.load('eurostile.ttf'),
+                                       fg=(0,1,0,1),
+                                       pos=(0,0,0),
+                                       scale=.15,
+                                       mayChange=True,
+                                       parent=self.node2d)
+        
         #modInfo['interval'] = modInfo['model'].hprInterval( 0.6, Vec3(15,450,0) )
         #modInfo['interval'].loop()
         modInfo['interval'] = None
@@ -89,6 +108,27 @@ class ScoreScreen(GameScreen):
                                  image="assets/images/laser_millions.png",     # File name specified
                                  pos=(0,0,-2),                              # z: -2 is off screen at the bottom
                                  scale=(0.3,0.3,0.3))                         # Scale it down a bit horizontally and vertically to make it look right
+        
+        self.ef_bonus = OnscreenImage(
+                                 parent=self.node2d,                        # Parented to our 2d node renderer
+                                 image="assets/images/edgar_friendly.png",     # File name specified
+                                 pos=(0,0,0),                              # z: -2 is off screen at the bottom
+                                 scale=(0.3,0.3,0.3))                         # Scale it down a bit horizontally and vertically to make it look right
+        
+        self.ef_bonus_task = None
+        self.toggle_ef = False
+        self.ef_bonus.hide()
+        
+        self.top_popper_award = OnscreenImage(
+                                 parent=self.node2d,                        # Parented to our 2d node renderer
+                                 image="assets/images/top_award_bg.png",     # File name specified
+                                 pos=(0,0,0),                              # z: -2 is off screen at the bottom
+                                 scale=(0.75,0.3,0.3),
+                                 sort=-20,
+                                 )                         # Scale it down a bit horizontally and vertically to make it look right
+        
+        self.top_popper_award.hide()
+        
         self.standup_collected = OnscreenImage(
                                  parent=self.node2d,                        # Parented to our 2d node renderer
                                  image="assets/images/standup_spotted.png",     # File name specified
@@ -138,6 +178,16 @@ class ScoreScreen(GameScreen):
         self.hide_l()
         self.hide_retina()
         
+    def set_award_text(self, text):
+        self.random_award_text.setText(text)
+        
+    def show_top_award(self):
+        self.top_popper_award.show()
+        self.random_award_text.show()
+        
+    def hide_top_award(self):
+        self.random_award_text.hide()
+        self.top_popper_award.hide()
         
     def spin_spinner(self):
         blue_side = 3435
@@ -178,6 +228,7 @@ class ScoreScreen(GameScreen):
         
     def update_ball(self, ball):
         self.ball_text.setText("BALL " + str(ball))
+        self.update_hud()
         
     def show_score(self):
         self.player_text.show()
@@ -267,6 +318,27 @@ class ScoreScreen(GameScreen):
         # Fire off the sequence
         s.start()
         
+    def show_ef_bonus(self):
+        if self.ef_bonus_task != None: return
+        self.ef_bonus.show()
+        self.ef_bonus_task = base.taskMgr.doMethodLater(0.01, self.toggle_ef_bonus, 'ef_bonus')
+        
+    def toggle_ef_bonus(self, task):
+        self.toggle_ef = not self.toggle_ef
+        
+        if self.toggle_ef:
+            self.ef_bonus.hide()
+        else:
+            self.ef_bonus.show()
+            
+        return task.again
+        
+    def hide_ef_bonus(self):
+        if self.ef_bonus_task != None:
+            base.taskMgr.remove(self.ef_bonus_task)
+            self.ef_bonus.hide()
+            self.ef_bonus_task = None
+        
     def show_m(self):
         self.mtlM.show()
     
@@ -291,6 +363,18 @@ class ScoreScreen(GameScreen):
     def hide_retina(self):
         self.retina.hide()
         
-    def set_bip(self,bip):
-        self.bip.setText("BIP: " + str(bip))
+    def update_hud(self):
+        self.bonus2x.hide()
+        self.bonus3x.hide()
+        self.bonus4x.hide()
+        self.bonus5x.hide()
+        
+        self.cfb.hide()
+        
+        if base.hwgame.current_player().bonus_x == 2: self.bonus2x.show()
+        if base.hwgame.current_player().bonus_x == 3: self.bonus3x.show()
+        if base.hwgame.current_player().bonus_x == 4: self.bonus4x.show()
+        if base.hwgame.current_player().bonus_x >= 5: self.bonus5x.show()
+        
+        if base.hwgame.current_player().call_for_backup: self.cfb.show()
         

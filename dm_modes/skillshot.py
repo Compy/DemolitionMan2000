@@ -3,6 +3,7 @@ import pinproc
 import logging
 from procgame import *
 from dmmode import DMMode
+from functools import partial
 
 class SkillShotMode(DMMode):
     def __init__(self, game):
@@ -32,27 +33,27 @@ class SkillShotMode(DMMode):
         
     def on_skillshot_hit(self, skillshot):
         if skillshot == "ADVANCE BONUS X":
-            self.game.current_player().player_stats['bonus_x'] += 1
+            self.game.current_player().bonus_x += 1
+            base.display_queue.put_nowait(partial(base.screenManager.getScreen("score").update_hud))
         elif skillshot == "5000 POINTS":
             self.game.score(5000)
+        elif skillshot == "500,000 POINTS":
+            self.game.score(500000)
         elif skillshot == "SPOT MTL":
             if not self.game.current_player().mlit: self.game.current_player().mlit = True
             elif not self.game.current_player().tlit: self.game.current_player().tlit = True
             elif not self.game.current_player().llit: self.game.current_player().llit = True
-        elif skillshot == "START MODE":
-            pass
+        elif skillshot == "QUICK FREEZE":
+            self.game.base_game_mode.quick_freeze()
         
         
         
     def sw_ballLaunch_active(self, sw):
         if self.game.switches.shooterLane.is_active():
             self.delay(name='end_skillshot', event_type=None, delay=4,handler=self.end_skillshot)
-            
-    def sw_rightFreeway_active(self, sw):
-        # If the freeway switch has already been hit, then ignore this
-        if self.freeway_hit_yet: return
-        # Check display screen to see if the skillshot target is low enough,
-        # if so, count it as a hit. Otherwise, cancel the mode
+            self.delay('auto_hit_skillshot', event_type=None, delay=0.4, handler=self.auto_hit_skillshot)
+        
+    def auto_hit_skillshot(self):
         base.messenger.send("skillshot_hit")
         self.game.sound.play("woosh")
         self.game.score(1000)
@@ -71,7 +72,7 @@ class SkillShotMode(DMMode):
         
         base.screenManager.showModalMessage(
                                             message="Skillshot!\n" + str(award), 
-                                            modal_name="ball_save", 
+                                            modal_name="skill_shot", 
                                             fg=(1,0,0,1),
                                             frame_color=(1,0,0,1),
                                             blink_speed=0.030,

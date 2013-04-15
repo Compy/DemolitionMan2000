@@ -15,7 +15,7 @@ class AcmagMode(DMMode):
         self.switch_ignores = {}
         self.switch_ignores['right_enter'] = False
         self.switch_ignores['left_enter'] = False
-        
+        self.acmag_shots = 0
         
     def mode_started(self):
         self.logger.info("Starting ACMAG mode...")
@@ -29,11 +29,12 @@ class AcmagMode(DMMode):
         self.screen.mode_started()
             
         self.game.sound.play("computer_acmag", fade_music=True)
-        self.game.base_game_mode.set_timer(30)
+        self.game.base_game_mode.set_timer(20)
         self.game.base_game_mode.start_timer()
         self.delay(name='acmag_blink_score', event_type=None, delay=0.42, handler=self.toggle_score_color)
         self.mode_accomplished = False
         base.screenManager.showScreen("acmag", False)
+        self.acmag_shots = 0
     
     def mode_stopped(self):
         self.logger.info("ACMAG mode complete")
@@ -41,12 +42,17 @@ class AcmagMode(DMMode):
         self.cancel_delayed('acmag_blink_score')
         base.screenManager.getScreen("score").set_score_color((0,1,1,1))
         
+        if self.acmag_shots >= 8:
+            self.mode_accomplished = True
+            self.game.current_player().acmag = True
+        
         # If this mode wasn't accomplished, undo all acmag settings so the player
         # can re-run the mode
         if not self.mode_accomplished:
             self.game.current_player().acmag = False
-            # Cut them some slack at 25%
-            self.game.current_player().acmag_percentage = 60
+            self.game.current_player().acmag_percentage = 10
+            
+        base.screenManager.hideScreen("acmag")
             
     def ball_drained(self):
         if self.game.trough.num_balls_in_play > 0: return
@@ -59,7 +65,9 @@ class AcmagMode(DMMode):
         self.game.modes.remove(self)
         
         if self.game.trough.num_balls_in_play > 0:
-            self.game.sound.play_music("main",-1)
+            self.game.play_music()
+            
+        base.screenManager.hideScreen("acmag")
         
         
     def toggle_score_color(self):
@@ -80,6 +88,8 @@ class AcmagMode(DMMode):
             return
         
         self.game.sound.play("explode")
+        self.game.score(750000)
+        self.acmag_shots += 1
         
         if random.randint(1,3) == 2:
             self.cancel_delayed('acmag_praise')
@@ -93,6 +103,8 @@ class AcmagMode(DMMode):
             return
         
         self.game.sound.play("explode")
+        self.game.score(750000)
+        self.acmag_shots += 1
         
         if random.randint(1,3) == 2:
             self.cancel_delayed('acmag_praise')
@@ -107,6 +119,8 @@ class AcmagMode(DMMode):
         self.screen.generate_new_barrel()
         self.screen.explode_center()
         self.game.sound.play("explode")
+        self.game.score(750000)
+        self.acmag_shots += 1
         
         if random.randint(1,2) == 2:
             self.cancel_delayed('acmag_praise')

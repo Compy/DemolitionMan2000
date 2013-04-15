@@ -4,6 +4,7 @@ import logging
 import random
 from procgame import *
 from dmmode import DMMode
+from functools import partial
 
 class ComputerMode(DMMode):
     computer_awards = [
@@ -25,16 +26,18 @@ class ComputerMode(DMMode):
                        ('Mystery Mode', None),
                        ('Mystery Mode', None),
                        ('Mystery Mode', None),
+                       ('Mystery Mode', None),
+                       ('Mystery Mode', None),
                        #('Increase Bonus X', None),
                        #('Increase Bonus X', None),
                        #('Call For Backup', None),
                        #('Call For Backup', None)
                        #('Maximize Freezes', 'computer_max_freezes'),
                        #('Collect Bonus', 'computer_max_freezes'), #FIXME
-                       ('Collect Standups', 'computer_max_freezes'),
-                       ('Collect Standups', 'computer_max_freezes'),
-                       ('Collect Standups', 'computer_max_freezes'),
-                       ('Collect Standups', 'computer_max_freezes'),
+                       ('Collect Standups', 'collect_standups'),
+                       ('Collect Standups', 'collect_standups'),
+                       ('Collect Standups', 'collect_standups'),
+                       ('Collect Standups', 'collect_standups'),
                        ('250,000', None),
                        ('500,000', None),
                        ('1,000,000', None)
@@ -116,6 +119,10 @@ class ComputerMode(DMMode):
             self.game.current_player().wtsa = True
             self.game.modes.add(self.game.wtsa)
             self.game.modes.remove(self)
+            
+        if self.award[0] == "Collect Standups":
+            self.cancel_delayed('end_computer')
+            self.collect_standups(1)
         
         if self.award[0] == "3X Car Crash":
             pass
@@ -135,6 +142,18 @@ class ComputerMode(DMMode):
             
         if self.award[0] == "Increase Bonus X":
             self.game.current_player().bonus_x += 1
+            base.display_queue.put_nowait(partial(base.screenManager.getScreen("score").update_hud))
+            
+        if self.award[0] == "2X Retina Scan":
+            self.game.score(1500000)
+    
+    def collect_standups(self,num):
+        if num <= 5:
+            new_num = num + 1
+            self.game.base_game_mode.spot_standup()
+            self.delay('spot_standup', event_type=None, delay=0.8, handler=self.collect_standups, param=new_num)
+        else:
+            self.delay(name='end_computer', event_type=None, delay=1, handler=self.end_computer)
     
     def update_lamps(self):
         if self.game.current_player().computer_lit:

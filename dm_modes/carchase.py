@@ -21,11 +21,12 @@ class CarChaseMode(DMMode):
         
         self.screen = base.screenManager.getScreen("carchase")
         
-        self.sounds = ['spartan_catchup', 'spartan_push', 'huxley_scream', 'huxley_scream' 'huxley_gotit', 'huxley_scream', 'spartan_catchup', 'spartan_push_pedal']
+        self.sounds = ['spartan_catchup', 'huxley_scream', 'huxley_scream' 'huxley_gotit', 'huxley_scream', 'spartan_catchup', 'spartan_push_pedal']
         
     def mode_started(self):
         self.logger.info("Starting car chase mode...")
         self.cancel_all_delayed()
+        self.game.close_divertor()
         
         if not self.game.acmag.is_started():
             base.screenManager.getScreen("stack").clear_stacks()
@@ -40,7 +41,7 @@ class CarChaseMode(DMMode):
         
         self.current_sound = 0
         
-        self.game.base_game_mode.set_timer(30)
+        self.game.base_game_mode.set_timer(20)
         self.game.base_game_mode.start_timer()
         self.update_lamps()
         
@@ -71,7 +72,7 @@ class CarChaseMode(DMMode):
             self.game.base_game_mode.pause_timer()
             self.delay('explode_lamps', event_type=None, delay=6.5, handler=self.explode_lamps)
             self.delay('show_award', event_type=None, delay=7.6, handler=self.show_award)
-            
+            self.game.current_player().car_chase = True
             base.screenManager.showScreen("carchase")
     
     def explode_lamps(self):
@@ -168,24 +169,24 @@ class CarChaseMode(DMMode):
     
     def mode_stopped(self):
         self.logger.info("Car Chase mode complete")
-        self.game.close_divertor()
+        if not self.game.current_player().claw_lit:
+            self.game.close_divertor()
+        
         self.game.coils.leftRampLwrFlasher.disable()
         self.game.coils.rightRampFlasher.disable()
         self.game.lamps.rightRampCarChase.disable()
         self.game.lamps.leftRampCarChase.disable()
         if self.game.acmag.is_started() and self.game.current_player().timer > 0:
-            self.game.sound.play_music("acmag",-1)
             self.game.base_game_mode.start_timer()
         else:
             self.game.current_player().timer = 0
             self.game.base_game_mode.start_timer()
         
         if self.game.trough.num_balls_in_play > 0:
-            self.game.sound.play_music("main",-1)
+            self.game.play_music()
         
     def timeout(self):
         self.logger.info("Car Chase timeout")
-        self.game.sound.play_music("main",-1)
         self.game.current_player().car_chase = True
         self.game.modes.remove(self)
         

@@ -130,7 +130,7 @@ class MatchScreen(GameScreen):
         base.taskMgr.doMethodLater(0.5, self.showMatchNumber, 'match_show')
         
     def showMatchNumber(self,task):
-        random_match = random.randint(0,90)
+        random_match = random.randint(0,9)
         if random_match < 10:
             r = str(random_match) + "0"
         else:

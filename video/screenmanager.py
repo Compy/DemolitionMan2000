@@ -21,6 +21,8 @@ from match import MatchScreen
 from sanangeles import SanAngelesScreen
 from stack import StackScreen
 from carchase import CarChaseScreen
+from extraball import ExtraBallScreen
+from claw import ClawScreen
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText, TextNode
 from functools import partial
@@ -114,6 +116,8 @@ class ScreenManager(object):
         self.screens['match'] = MatchScreen(self)
         self.screens['wtsa'] = SanAngelesScreen(self)
         self.screens['carchase'] = CarChaseScreen(self)
+        self.screens['extraball'] = ExtraBallScreen(self)
+        self.screens['claw'] = ClawScreen(self)
     
     def getScreen(self, name):
         return self.screens[name]

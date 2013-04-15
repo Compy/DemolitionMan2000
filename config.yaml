@@ -26,7 +26,7 @@ keyboard_switch_map:
     y: chaseCar2
     h: chaseCar1
     m: mtlM
-    t: mtlT
+    t: topPopper
     l: mtlL
     u: leftRampExit
     j: rightRampExit

@@ -14,7 +14,7 @@ class ComboMode(DMMode):
     BLINK_SLOW = 0xf0f0f0f0
     BLINK_FAST = 0xbbbbbbbb
     
-    COMBO_COMPUTER = [2,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
+    COMBO_COMPUTER = [2,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     COMBO_EXTRABALL = [15,45]
     
     LOCATION_SUBWAY = (0.3261,0,-0.4973)
@@ -24,7 +24,7 @@ class ComboMode(DMMode):
     LOCATION_SIDERAMP = (0.5195,0,-0.3489)
     LOCATION_LEFTLOOP = (0.52539,0,-0.7812)
     LOCATION_FREEWAY = (0.8847,0,0.8347)
-    LOCATION_RIGHTRAMP = (0.5039,0,-0.36197)
+    LOCATION_RIGHTRAMP = (0.5039,0,0.36197)
     
     def __init__(self, game):
         super(ComboMode, self).__init__(game, 10)

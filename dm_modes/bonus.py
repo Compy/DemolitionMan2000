@@ -15,6 +15,7 @@ class BonusMode(DMMode):
         self.logger.info("Starting bonus mode...")
         #base.screenManager.showScreen("skillshot", False)
         #self.skillshot_screen = base.screenManager.getScreen("skillshot")
+        self.game.close_divertor()
         self.game.dim_lower_pf()
         if not self.game.bonus_preemptive:
             self.game.sound.play_music("ball_end")
@@ -41,10 +42,12 @@ class BonusMode(DMMode):
         
         self.total = total
         
+        
         self.bonus_screen.add_bonus_item("Total", total, True)
         base.screenManager.showScreen("bonus", False)
         self.bonus_screen.start_animation()
         self.game.current_player().explosions = 0
+        self.game.current_player().bonus_x = 1
     
     def mode_stopped(self):
         self.logger.info("Bonus mode complete")

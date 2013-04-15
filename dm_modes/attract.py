@@ -18,7 +18,7 @@ class AttractMode(DMMode):
     '''
     
     screen_rotation = [
-                       ['attract4', 10.0],
+                       ['claw', 200.0],
                        ['attract1', 5.5],
                        ['attract2', 16.0],
                        ['attract5', 20.0],
@@ -98,6 +98,7 @@ class AttractMode(DMMode):
     
     def sw_coinDoor_closed(self, sw):
         base.screenManager.hideModalMessage('coin_door_open')
+        base.show_mouse_cursor(False)
     
     def sw_coinDoor_open(self, sw):
         base.screenManager.showModalMessage(
@@ -108,6 +109,8 @@ class AttractMode(DMMode):
                                             blink_speed = 0.3,
                                             blink_color = (1,1,0,1),
                                             frame_blink_color = (0,0,0,1))
+        
+        base.show_mouse_cursor(True)
         
     def sw_ballLaunch_active_for_5s(self, sw):
         if not self.game.switches.coinDoor.is_active():

@@ -17,10 +17,12 @@ import os, sys
 class SkillShotScreen(GameScreen):
 
     awards = [
+              "QUICK FREEZE",
               "ADVANCE BONUS X",
               "5000 POINTS",
               "SPOT MTL",
-              "START MODE"
+              "QUICK FREEZE",
+              "500,000 POINTS"
               ]
 
     current_side = 1

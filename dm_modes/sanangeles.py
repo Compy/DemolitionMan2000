@@ -37,10 +37,16 @@ class SanAngelesMode(DMMode):
         #self.game.lampController.play_show("wtsa",
         #                                   repeat=True)
         
+        if self.game.current_player().claw_lit:
+            self.game.close_divertor()
+            self.game.current_player().access_claw_lit = True
+            self.game.current_player().claw_lit = False
+            self.game.update_lamps()
+        
     def start(self):
         self.screen.hide_instructions()
         self.game.base_game_mode.release_bottomPopper()
-        self.game.base_game_mode.set_timer(30)
+        self.game.base_game_mode.set_timer(20)
         self.game.base_game_mode.start_timer()
         self.screen.mode_started()
         self.game.trough.launch_balls(2,stealth=False)
@@ -139,6 +145,7 @@ class SanAngelesMode(DMMode):
         if award == "bonus_x":
             self.game.current_player().bonus_x += 1
             message = "Multiplier Increased!"
+            base.display_queue.put_nowait(partial(base.screenManager.getScreen("score").update_hud))
             
         base.screenManager.showModalMessage(
                                     message = message,

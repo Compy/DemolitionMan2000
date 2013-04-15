@@ -154,11 +154,11 @@ class HWGame(BasicPinboxGame):
         
         self.highscore_categories = []
         cat = highscore.HighScoreCategory()
-        cat.scores = [highscore.HighScore(score=500000000, inits='JWL'),
-                      highscore.HighScore(score=450000000, inits='GSS'),
-                      highscore.HighScore(score=400000000, inits='ASP'),
-                      highscore.HighScore(score=350000000, inits='JFP'),
-                      highscore.HighScore(score=300000000, inits='JAP')
+        cat.scores = [highscore.HighScore(score=1500000000, inits='JWL'),
+                      highscore.HighScore(score=1450000000, inits='GSS'),
+                      highscore.HighScore(score=1400000000, inits='ASP'),
+                      highscore.HighScore(score=1350000000, inits='JFP'),
+                      highscore.HighScore(score=1300000000, inits='JAP')
                       ]
         cat.game_data_key = "ClassHighScoreData"
         self.highscore_categories.append(cat)
@@ -219,6 +219,13 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("mtl_whoosh", "assets/sfx/mtl_whoosh.wav")
         self.sound.register_sound("dontmove", "assets/speech/spartan_dontmove.wav")
         self.sound.register_sound("maniac", "assets/speech/maniac.ogg")
+        self.sound.register_sound("collect_standups", "assets/speech/collect_standups.wav")
+        self.sound.register_sound("leary_bacon", "assets/speech/leary_bacon.wav")
+        self.sound.register_sound("leary_cigar", "assets/speech/leary_cigar.wav")
+        self.sound.register_sound("leary_tbone", "assets/speech/leary_tbone.wav")
+        self.sound.register_sound("lookgreat", "assets/speech/lookgreat.wav")
+        self.sound.register_sound("shoot_again", "assets/speech/shoot_again.wav")
+        self.sound.register_sound("spartan_yeah", "assets/speech/spartan_whoayeah.wav")
         
         self.sound.register_sound("standup", "assets/sfx/standup.wav")
         
@@ -230,6 +237,8 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("retina", "assets/sfx/retina_scan.wav")
         self.sound.register_sound("retina_eject", "assets/sfx/retina_eject.wav")
         
+        self.sound.register_sound("top_random_award", "assets/music/top_random_award.wav")
+        
         # SPEECH
         self.sound.register_sound("boggle", "assets/speech/boggle.wav")
         self.sound.register_sound("cows", "assets/speech/huxley_cows.wav")
@@ -237,6 +246,8 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("seashells", "assets/speech/seashells.wav")
         self.sound.register_sound("verbal_fine", "assets/speech/verbal_fine.wav")
         
+        self.sound.register_sound("computer_superjets_activated", "assets/speech/superjets_activated.wav")
+        self.sound.register_sound("computer_superjets_complete", "assets/speech/superjets_complete.wav")
         self.sound.register_sound("computer_double_retina_scan", "assets/speech/computer_double_retina_scan.wav")
         self.sound.register_sound("computer_explode_activated", "assets/speech/computer_explode_activated.wav")
         self.sound.register_sound("computer_explode_hurryup", "assets/speech/computer_explode_hurryup.wav")
@@ -268,6 +279,12 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("wb_bang", "assets/sfx/wb_bang.wav")
         self.sound.register_sound("mtl_complete", "assets/speech/mtl_complete.wav")
         self.sound.register_sound("jackpot", "assets/speech/jackpot.wav")
+        self.sound.register_sound("cryo_claw_activated", "assets/speech/cryo_claw_activated.wav")
+        self.sound.register_sound("buttons_release_ball", "assets/speech/buttons_release_ball.wav")
+        self.sound.register_sound("triggers_move_claw", "assets/speech/triggers_move_claw.wav")
+        self.sound.register_sound("superjet", "assets/sfx/superjet_1.wav")
+        self.sound.register_sound("superjet", "assets/sfx/superjet_2.wav")
+        self.sound.register_sound("superjet", "assets/sfx/superjet_3.wav")
         
         
         logging.info("Loading music")
@@ -288,6 +305,7 @@ class HWGame(BasicPinboxGame):
         self.sound.register_music("wb", "assets/music/wb.ogg")
         self.sound.register_music("fortressmb", "assets/music/fortressmb.ogg")
         self.sound.register_music("mb_ready", "assets/music/mb_ready.wav")
+        self.sound.register_music("claw", "assets/music/claw.mp3")
         
         ##
         ## MUSIC
@@ -313,22 +331,15 @@ class HWGame(BasicPinboxGame):
         self.modes.add(self.ball_search)
         self.modes.add(self.ball_save)
         self.modes.add(self.trough)
-        self.modes.add(self.claw)
         self.modes.add(self.boot)
+        self.modes.add(self.claw)
         self.save_game_data()
         
     def open_divertor(self):
-        if self.is_divertor_open == False:
-            logging.info("Opening claw divertor")
-            self.coils['divertorMain'].pulse(30)
-            self.coils['divertorHold'].pulse(0)
-            self.is_divertor_open = True
+        self.claw.open_divertor()
             
     def close_divertor(self):
-        logging.info("Closing claw divertor")
-        self.coils['divertorHold'].disable()
-        self.coils['divertorMain'].disable()
-        self.is_divertor_open = False
+        self.claw.close_divertor()
         
     def ball_starting(self):
         logging.info("Ball starting")
@@ -344,6 +355,9 @@ class HWGame(BasicPinboxGame):
         self.modes.add(self.carcrash)
         self.modes.add(self.explode)
         
+        if not self.claw.is_started():
+            self.modes.add(self.claw)
+        
         base.messenger.send("update_ball", [self.ball])
         
         p = self.current_player()
@@ -351,6 +365,9 @@ class HWGame(BasicPinboxGame):
         
         if p.computer_lit:
             self.modes.add(self.computer)
+            
+        if p.claw_lit:
+            self.open_divertor()
         
         self.restore_player_feature_lamps()
         
@@ -364,7 +381,7 @@ class HWGame(BasicPinboxGame):
         
         p = self.current_player()
 
-        if p.claw_lit:
+        if p.claw_lit and not self.car_chase.is_started():
             self.lamps.clawReady.schedule(schedule=0x0f0f0f0f, cycle_seconds=0, now=True)
         if p.access_claw_lit:
             self.lamps.accessClaw.pulse(0)
@@ -444,6 +461,9 @@ class HWGame(BasicPinboxGame):
         self.modes.remove(self.acmag)
         self.modes.remove(self.carcrash)
         self.modes.remove(self.explode)
+        if self.claw.is_started():
+            self.claw.close_divertor()
+            
         if self.current_player().computer_lit:
             self.modes.remove(self.computer)
         if self.current_player().sanangeles_in_progress:
@@ -598,9 +618,23 @@ class HWGame(BasicPinboxGame):
     def drain_callback(self):
         pass
     
-        
+    def play_music(self):
+        """
+        Plays the appropriate background music given the mode that is currently active
+        """
+        if self.car_chase.is_started():
+            self.sound.play_music("chase",-1)
+        elif self.acmag.is_started():
+            self.sound.play_music("acmag",-1)
+        elif self.wtsa.is_started():
+            self.sound.play_music("wtsa", -1)
+        elif self.current_player().multiball_lit:
+            self.sound.play_music('fortressmb', -1)
+        else:
+            self.sound.play_music("main",-1)
     
     def shoot_again(self):
+        self.base_game_mode.delay('shoot_again_sound', event_type=None, delay=1.3, handler=self.play_shoot_again)
         base.screenManager.showModalMessage(
             message = self.current_player().name + " SHOOTS AGAIN",
             time = 2.0,
@@ -613,3 +647,6 @@ class HWGame(BasicPinboxGame):
             frame_margin = (0.1,0.25,0,0)
             )
         super(HWGame, self).shoot_again()
+        
+    def play_shoot_again(self):
+        self.sound.play('shoot_again', fade_music=True)
