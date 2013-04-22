@@ -61,7 +61,7 @@ class ClawScreen(GameScreen):
         self.claw_superjets = OnscreenImage(image = 'assets/images/claw_superjets.png', pos = self.positions[3],
                                    parent=self.node2d,
                                    scale=.1)
-        self.claw_tz = OnscreenImage(image = 'assets/images/claw_tz.png', pos = self.positions[4],
+        self.claw_ss = OnscreenImage(image = 'assets/images/claw_ss.png', pos = self.positions[4],
                                    parent=self.node2d,
                                    scale=.1)
         
@@ -74,7 +74,7 @@ class ClawScreen(GameScreen):
         self.claw_cfb.hide()
         self.claw_lock.hide()
         self.claw_superjets.hide()
-        self.claw_tz.hide()
+        self.claw_ss.hide()
         
         self.awards = []
         
@@ -99,7 +99,7 @@ class ClawScreen(GameScreen):
         self.claw_cfb.hide()
         self.claw_lock.hide()
         self.claw_superjets.hide()
-        self.claw_tz.hide()
+        self.claw_ss.hide()
         
         # Pos 1: 5 COMBOS | 10M
         # POS 2: EB | LOCK
@@ -110,38 +110,38 @@ class ClawScreen(GameScreen):
         for i in range(5):
             r = random.randint(1,2)
             if i == 0:
-                if r == 1:
+                if random.randint(1,2) == 1:
                     self.claw_5combos.show()
                     self.awards.append("5 combos")
                 else: 
                     self.claw_10m.show()
                     self.awards.append("10 million")
             if i == 1:
-                if r == 1: 
+                if random.randint(1,3) == 1: 
                     self.claw_eb.show()
                     self.awards.append("extra ball")
                 else: 
                     self.claw_lock.show()
                     self.awards.append("lock")
             if i == 2:
-                if r == 1:
+                if random.randint(1,2) == 1:
                     self.claw_carchase.show()
                     self.awards.append("car chase")
                 else:
                     self.claw_bonusx.show()
                     self.awards.append("bonus x")
             if i == 3:
-                if r == 1:
+                if random.randint(1,2) == 1:
                     self.claw_superjets.show()
                     self.awards.append("superjets")
                 else:
                     self.claw_addexplode.show()
                     self.awards.append("add explode")
             if i == 4:
-                if r == 1:
+                if random.randint(1,2) == 1 and not base.hwgame.current_player().call_for_backup:
                     self.claw_cfb.show()
                     self.awards.append("cfb")
                 else:
-                    self.claw_tz.show()
-                    self.awards.append("tz")
+                    self.claw_ss.show()
+                    self.awards.append("ss")
         

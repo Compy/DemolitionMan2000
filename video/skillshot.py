@@ -12,7 +12,7 @@ from video.uielements import Menu, Sprite
 from direct.interval.IntervalGlobal import *
 from panda3d.core import *
 from direct.showbase.DirectObject import DirectObject
-import os, sys
+import os, sys, random
 
 class SkillShotScreen(GameScreen):
 
@@ -22,7 +22,8 @@ class SkillShotScreen(GameScreen):
               "5000 POINTS",
               "SPOT MTL",
               "QUICK FREEZE",
-              "500,000 POINTS"
+              "500,000 POINTS",
+              "LIGHT CLAW"
               ]
 
     current_side = 1
@@ -168,7 +169,7 @@ class SkillShotScreen(GameScreen):
         base.taskMgr.doMethodLater(0.1, self._advanceAward, 'award_advance')   
         
         self.cube.setLight(self.dlnp)
-        
+        random.shuffle(self.awards)
         self.obj.ignoreAll()
         self.obj.acceptOnce("skillshot_hit", self.stop_skillshot_motion)
         self.cube.show()

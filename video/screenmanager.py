@@ -22,6 +22,7 @@ from sanangeles import SanAngelesScreen
 from stack import StackScreen
 from carchase import CarChaseScreen
 from extraball import ExtraBallScreen
+from simon_says import SimonSaysScreen
 from claw import ClawScreen
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText, TextNode
@@ -118,6 +119,7 @@ class ScreenManager(object):
         self.screens['carchase'] = CarChaseScreen(self)
         self.screens['extraball'] = ExtraBallScreen(self)
         self.screens['claw'] = ClawScreen(self)
+        self.screens['simon_says'] = SimonSaysScreen(self)
     
     def getScreen(self, name):
         return self.screens[name]

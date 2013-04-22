@@ -11,9 +11,9 @@ class FortressMultiball(DMMode):
         super(FortressMultiball, self).__init__(game, 14)
         self.logger = logging.getLogger("FortressMB")
         
-        self.jackpots = ['center','left_ramp','left_loop','right_freeway','right_ramp','right_subway','side_ramp']
+        self.jackpots = ['center','left_loop','right_subway','left_ramp','right_ramp','side_ramp','right_freeway']
         self.current_jackpot = 0
-        self.jackpot_score = 750000
+        self.jackpot_score = 3000000
         
     def mode_started(self):
         self.logger.info("Starting Fortress Multiball...")
@@ -30,7 +30,7 @@ class FortressMultiball(DMMode):
         self.cancel_all_delayed()
         
         self.current_jackpot = 0
-        self.jackpot_score = 750000
+        self.jackpot_score = 3000000
         
         self.game.sound.play_music("fortressmb",-1)
         self.delay('play_maniac', event_type=None, delay=1, handler=self.play_maniac)
@@ -48,7 +48,7 @@ class FortressMultiball(DMMode):
         self.game.close_divertor()
         
     def increment_jackpot(self):
-        self.jackpot_score += 500000
+        self.jackpot_score += 1500000
         self.current_jackpot += 1
         if self.current_jackpot > len(self.jackpots) - 1:
             self.current_jackpot = 0

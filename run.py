@@ -104,7 +104,7 @@ class PinboxApp(ShowBase):
         # *** Setup title 
         wp = WindowProperties() 
         wp.setTitle("Pinbox") 
-        wp.setCursorHidden(False)
+        wp.setCursorHidden(True)
         base.win.requestProperties(wp) 
         
         self.sprites = []

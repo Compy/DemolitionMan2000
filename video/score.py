@@ -55,21 +55,34 @@ class ScoreScreen(GameScreen):
                                    parent=self.node2d,
                                    scale=.06)
         
-        self.bonus2x = OnscreenImage(image = 'assets/images/2x.png', pos = (-1.2, 0, 0.93),
+        self.bonus2x = OnscreenImage(image = 'assets/images/2x.png', pos = (-1.25, 0, 0.93),
                                    parent=self.node2d,
                                    scale=.06)
-        self.bonus3x = OnscreenImage(image = 'assets/images/3x.png', pos = (-1.2, 0, 0.93),
+        self.bonus3x = OnscreenImage(image = 'assets/images/3x.png', pos = (-1.25, 0, 0.93),
                                    parent=self.node2d,
                                    scale=.06)
-        self.bonus4x = OnscreenImage(image = 'assets/images/4x.png', pos = (-1.2, 0, 0.93),
+        self.bonus4x = OnscreenImage(image = 'assets/images/4x.png', pos = (-1.25, 0, 0.93),
                                    parent=self.node2d,
                                    scale=.06)
-        self.bonus5x = OnscreenImage(image = 'assets/images/5x.png', pos = (-1.2, 0, 0.93),
+        self.bonus5x = OnscreenImage(image = 'assets/images/5x.png', pos = (-1.25, 0, 0.93),
                                    parent=self.node2d,
                                    scale=.06)
-        self.cfb = OnscreenImage(image = 'assets/images/cfb.png', pos = (-1.0, 0, 0.93),
+        self.cfb = OnscreenImage(image = 'assets/images/cfb.png', pos = (-1.1, 0, 0.93),
                                    parent=self.node2d,
                                    scale=.06)
+        
+        self.sj = OnscreenImage(image = 'assets/images/hud_superjets.png', pos = (-1.0, 0, 0.93),
+                                   parent=self.node2d,
+                                   scale=.06)
+        
+        self.sj_text = OnscreenText("25",
+                                       1,
+                                       font=base.fontLoader.load('motorwerk.ttf'),
+                                       fg=(1,0,0,1),
+                                       pos=(-0.5,0.92),
+                                       scale=.1,
+                                       mayChange=True,
+                                       parent=self.node2d)
         
         self.timer_text = OnscreenText("--",
                                        1,
@@ -370,6 +383,8 @@ class ScoreScreen(GameScreen):
         self.bonus5x.hide()
         
         self.cfb.hide()
+        self.sj.hide()
+        self.sj_text.hide()
         
         if base.hwgame.current_player().bonus_x == 2: self.bonus2x.show()
         if base.hwgame.current_player().bonus_x == 3: self.bonus3x.show()
@@ -377,4 +392,8 @@ class ScoreScreen(GameScreen):
         if base.hwgame.current_player().bonus_x >= 5: self.bonus5x.show()
         
         if base.hwgame.current_player().call_for_backup: self.cfb.show()
+        
+        if base.hwgame.current_player().super_jets:
+            self.sj.show()
+            self.sj_text.setText(str(base.hwgame.current_player().super_jets_left))
         

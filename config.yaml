@@ -13,9 +13,10 @@ keyboard_switch_map:
     d: phantomSwitch
     z: flipperLwL
     /: flipperLwR
+    a: leftHandle
+    l: rightHandle
     f: rightFreeway
     n: shooterLane
-    a: coinDoor
     k: leftOutlane
     r: rightInlane
     p: bottomPopper
@@ -27,7 +28,6 @@ keyboard_switch_map:
     h: chaseCar1
     m: mtlM
     t: topPopper
-    l: mtlL
     u: leftRampExit
     j: rightRampExit
     x: sideRampExit

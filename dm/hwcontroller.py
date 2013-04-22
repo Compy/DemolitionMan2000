@@ -18,7 +18,7 @@ from procgame.highscore import *
 from procgame.modes import BallSave, Trough, BallSearch
 from procgame.game import BasicPinboxGame
 from dm_modes import elevator, boot, attract, blocks, skillshot, basemode, status, bonus, claw, combos, carcrash, sanangeles
-from dm_modes import computer, acmag, match, carchase, wizardblocks, explode, multiball
+from dm_modes import computer, acmag, match, carchase, wizardblocks, explode, multiball, simon_says
 from pinbox import service
 from player import DMPlayer
 import pinproc
@@ -138,6 +138,7 @@ class HWGame(BasicPinboxGame):
         self.wtsa = sanangeles.SanAngelesMode(self)
         self.car_chase = carchase.CarChaseMode(self)
         self.fortress = multiball.FortressMultiball(self)
+        self.simon_says = simon_says.SimonSays(self)
         ## SERVICE MODES AND SUBMODES ##
         self.service = service.ServiceMainMenu(self)
         self.service_diagnostics = service.ServiceDiagnosticsMenu(self)
@@ -236,6 +237,14 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("engine", "assets/sfx/engine.wav")
         self.sound.register_sound("retina", "assets/sfx/retina_scan.wav")
         self.sound.register_sound("retina_eject", "assets/sfx/retina_eject.wav")
+        self.sound.register_sound("ss_blue", "assets/sfx/ss_blue.wav")
+        self.sound.register_sound("ss_red", "assets/sfx/ss_red.wav")
+        self.sound.register_sound("ss_yellow", "assets/sfx/ss_yellow.wav")
+        self.sound.register_sound("ss_green", "assets/sfx/ss_green.wav")
+        self.sound.register_sound("ss_ramp1", "assets/sfx/ss_ramp1.mp3")
+        self.sound.register_sound("ss_ramp2", "assets/sfx/ss_ramp2.mp3")
+        self.sound.register_sound("ss_r2", "assets/sfx/ss_r2.mp3")
+        self.sound.register_sound("alarm", "assets/sfx/alarm.wav")
         
         self.sound.register_sound("top_random_award", "assets/music/top_random_award.wav")
         
@@ -269,6 +278,8 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("huxley_scream", "assets/speech/huxley_scream.wav")
         self.sound.register_sound("simon_lovely", "assets/speech/simon_lovely.wav")
         self.sound.register_sound("simon_right", "assets/speech/simon_right.wav")
+        self.sound.register_sound("cfb", "assets/speech/cfb.mp3")
+        self.sound.register_sound("simon_says", "assets/speech/simon_says.mp3")
         self.sound.register_sound("spartan_catchup", "assets/speech/spartan_catchup.wav")
         self.sound.register_sound("spartan_left", "assets/speech/spartan_left.wav")
         self.sound.register_sound("spartan_push_pedal", "assets/speech/spartan_push_pedal.wav")
@@ -282,6 +293,19 @@ class HWGame(BasicPinboxGame):
         self.sound.register_sound("cryo_claw_activated", "assets/speech/cryo_claw_activated.wav")
         self.sound.register_sound("buttons_release_ball", "assets/speech/buttons_release_ball.wav")
         self.sound.register_sound("triggers_move_claw", "assets/speech/triggers_move_claw.wav")
+        self.sound.register_sound("simon_hownice", "assets/speech/simon_hownice.wav")
+        self.sound.register_sound("simon_greatshot", "assets/speech/simon_greatshot.wav")
+        self.sound.register_sound("simon_laugh", "assets/speech/simon_laugh1.wav")
+        self.sound.register_sound("simon_laugh", "assets/speech/simon_laugh2.wav")
+        self.sound.register_sound("simon_laugh", "assets/speech/simon_laugh3.wav")
+        self.sound.register_sound("simon_lovethisgun", "assets/speech/simon_lovethisgun.wav")
+        self.sound.register_sound("simon_moveit", "assets/speech/simon_moveit.wav")
+        self.sound.register_sound("simon_nicemove", "assets/speech/simon_nicemove.wav")
+        self.sound.register_sound("simon_niceshooting", "assets/speech/simon_niceshooting.wav")
+        self.sound.register_sound("simon_pathetic", "assets/speech/simon_pathetic.wav")
+        self.sound.register_sound("simon_superjackpot", "assets/speech/simon_superjackpot.wav")
+        self.sound.register_sound("simon_toobad", "assets/speech/simon_toobad.wav")
+        
         self.sound.register_sound("superjet", "assets/sfx/superjet_1.wav")
         self.sound.register_sound("superjet", "assets/sfx/superjet_2.wav")
         self.sound.register_sound("superjet", "assets/sfx/superjet_3.wav")
@@ -306,6 +330,7 @@ class HWGame(BasicPinboxGame):
         self.sound.register_music("fortressmb", "assets/music/fortressmb.ogg")
         self.sound.register_music("mb_ready", "assets/music/mb_ready.wav")
         self.sound.register_music("claw", "assets/music/claw.mp3")
+        self.sound.register_music("simon_r2", "assets/music/simon_says_r2_music.mp3")
         
         ##
         ## MUSIC
@@ -463,6 +488,9 @@ class HWGame(BasicPinboxGame):
         self.modes.remove(self.explode)
         if self.claw.is_started():
             self.claw.close_divertor()
+            
+        if self.simon_says.is_started():
+            self.modes.remove(self.simon_says)
             
         if self.current_player().computer_lit:
             self.modes.remove(self.computer)
@@ -622,6 +650,8 @@ class HWGame(BasicPinboxGame):
         """
         Plays the appropriate background music given the mode that is currently active
         """
+        if self.trough.num_balls_in_play < 1: return
+        
         if self.car_chase.is_started():
             self.sound.play_music("chase",-1)
         elif self.acmag.is_started():
@@ -629,7 +659,11 @@ class HWGame(BasicPinboxGame):
         elif self.wtsa.is_started():
             self.sound.play_music("wtsa", -1)
         elif self.current_player().multiball_lit:
-            self.sound.play_music('fortressmb', -1)
+            self.sound.play_music('mb_ready', -1)
+        elif self.fortress.is_started():
+            self.sound.play_music('fortressmb',-1)
+        elif self.attract.is_started():
+            return
         else:
             self.sound.play_music("main",-1)
     

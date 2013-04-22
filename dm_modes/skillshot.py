@@ -45,6 +45,11 @@ class SkillShotMode(DMMode):
             elif not self.game.current_player().llit: self.game.current_player().llit = True
         elif skillshot == "QUICK FREEZE":
             self.game.base_game_mode.quick_freeze()
+        elif skillshot == "LIGHT CLAW":
+            self.game.current_player().claw_lit = True
+            self.game.current_player().access_claw_lit = False
+            self.game.sound.play("cryo_claw_activated", fade_music=True)
+            self.game.open_divertor()
         
         
         

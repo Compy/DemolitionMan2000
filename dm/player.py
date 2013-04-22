@@ -47,6 +47,7 @@ class DMPlayer(game.Player):
         self.bonus_x = 1
         self.sanangeles_in_progress = False
         self.call_for_backup = False
+        self.cfb_in_progress = False
         self.super_jets = False
         self.super_jets_left = 25
         

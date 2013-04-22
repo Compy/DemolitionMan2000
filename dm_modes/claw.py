@@ -40,61 +40,62 @@ class ClawMode(DMMode):
         self.do_enable_control = False
         
     def sw_clawCaptureSimon_active(self, sw):
-        if self.game.base_game_mode.is_started():
-            self.game.enable_flippers(True)
+        if not self.game.base_game_mode.is_started(): return
+        
+        self.game.enable_flippers(True)
+            
+        if self.game.car_chase.is_started(): return
             
         self.delay('end_claw', event_type=None, delay=3, handler=self.return_home)
         self.control_enabled = False
-        self.game.play_music()
-        self.game.gi_on()
         self.claw_lights_off(sw.name)
         base.screenManager.hideScreen("claw")
         self.process_award(4)
             
     def sw_clawSuperJets_active(self, sw):
-        if self.game.base_game_mode.is_started():
-            self.game.enable_flippers(True)
+        if not self.game.base_game_mode.is_started(): return
+        
+        self.game.enable_flippers(True)
+            
+        if self.game.car_chase.is_started(): return
             
         self.delay('end_claw', event_type=None, delay=3, handler=self.return_home)
         self.control_enabled = False
-        self.game.play_music()
-        self.game.gi_on()
         self.claw_lights_off(sw.name)
         base.screenManager.hideScreen("claw")
         self.process_award(3)
                     
     def sw_clawPrisonBreak_active(self, sw):
-        if self.game.base_game_mode.is_started():
-            self.game.enable_flippers(True)
+        if not self.game.base_game_mode.is_started(): return
+        
+        self.game.enable_flippers(True)
+            
+        if self.game.car_chase.is_started(): return
             
         self.delay('end_claw', event_type=None, delay=3, handler=self.return_home)
         self.control_enabled = False
-        self.game.play_music()
-        self.game.gi_on()
         self.claw_lights_off(sw.name)
         base.screenManager.hideScreen("claw")
         self.process_award(2)
             
     def sw_clawFreeze_active(self, sw):
-        if self.game.base_game_mode.is_started():
-            self.game.enable_flippers(True)
+        if not self.game.base_game_mode.is_started(): return
+        
+        self.game.enable_flippers(True)
             
         self.delay('end_claw', event_type=None, delay=3, handler=self.return_home)
         self.control_enabled = False
-        self.game.play_music()
-        self.game.gi_on()
         self.claw_lights_off(sw.name)
         base.screenManager.hideScreen("claw")
         self.process_award(1)
             
     def sw_clawAcmag_active(self, sw):
-        if self.game.base_game_mode.is_started():
-            self.game.enable_flippers(True)
+        if not self.game.base_game_mode.is_started(): return
+        
+        self.game.enable_flippers(True)
             
         self.delay('end_claw', event_type=None, delay=3, handler=self.return_home)
         self.control_enabled = False
-        self.game.play_music()
-        self.game.gi_on()
         self.claw_lights_off(sw.name)
         base.screenManager.hideScreen("claw")
         self.process_award(0)
@@ -123,38 +124,57 @@ class ClawMode(DMMode):
         
         if reward == "5 combos":
             self.add_combo_award(1)
+            self.game.gi_on()
         if reward == "10 million":
             self.game.score(10000000)
+            self.game.gi_on()
         if reward == "extra ball":
+            self.game.gi_off()
+            self.game.sound.play("extraball")
             self.game.current_player().extra_balls += 1
             self.delay('eb_delay',event_type=None,delay=3,handler=self.post_extraball_release)
             base.screenManager.hideScreen("score")
             base.screenManager.showScreen("extraball")
             return
         if reward == "lock":
-            pass
+            if self.game.current_player().multiball_lit:
+                self.game.modes.add(self.game.fortress)
+            else:
+                self.game.base_game_mode.quick_freeze()
+                self.game.gi_on()
         if reward == "car chase":
-            pass
+            self.game.current_player().car_chase = False
+            self.game.sound.play("crash")
+            self.game.modes.add(self.game.car_chase)
+            self.game.gi_on()
         if reward == "bonus x":
             self.game.current_player().bonus_x += 1
             base.display_queue.put_nowait(partial(base.screenManager.getScreen("score").update_hud))
+            self.game.gi_on()
         if reward == "superjets":
             self.game.sound.play("computer_superjets_activated",fade_music=True)
             self.game.current_player().super_jets = True
             self.game.current_player().super_jets_left = 25
+            base.display_queue.put_nowait(partial(base.screenManager.getScreen("score").update_hud))
+            self.game.gi_on()
         if reward == "add explode":
-            pass
+            self.game.base_game_mode.add_explode()
+            self.game.gi_on()
         if reward == "cfb":
             self.game.current_player().call_for_backup = True
             base.display_queue.put_nowait(partial(base.screenManager.getScreen("score").update_hud))
-        if reward == "tz":
-            pass
+            self.game.gi_on()
+        if reward == "ss":
+            self.game.gi_on()
+            self.game.modes.add(self.game.simon_says)
         
+        self.game.play_music()
         base.screenManager.showScreen("score")
         
     def post_extraball_release(self):
         base.screenManager.hideScreen("extraball")
         base.screenManager.showScreen("score")
+        self.game.gi_on()
         
     def add_combo_award(self, num = 1):
         self.game.combo_mode.add_combo(ComboMode.LOCATION_RIGHTRAMP)
@@ -335,7 +355,6 @@ class ClawMode(DMMode):
         self.stop()
         self.drop_ball()
         self.return_home()
-        self.game.gi_on()
         base.screenManager.hideScreen("claw")
         self.claw_lights_off()
         

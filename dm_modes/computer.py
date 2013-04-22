@@ -7,40 +7,62 @@ from dmmode import DMMode
 from functools import partial
 
 class ComputerMode(DMMode):
+    """
+    ('Extra Ball Lit', 'computer_light_eb'),
+    ('3X Car Crash', 'computer_triple_car_crash'),
+    ('3X Car Crash', 'computer_triple_car_crash'),
+    ('3X Car Crash', 'computer_triple_car_crash'),
+    ('2X Retina Scan', 'computer_double_retina_scan'),
+    ('2X Retina Scan', 'computer_double_retina_scan'),
+    ('2X Retina Scan', 'computer_double_retina_scan'),
+    ('Light Arrows', 'computer_light_arrows'),
+    ('Light Arrows', 'computer_light_arrows'),
+    ('Light Arrows', 'computer_light_arrows'),
+    ('Mystery Mode', None),
+    ('Mystery Mode', None),
+    ('Mystery Mode', None),
+    ('Mystery Mode', None),
+    ('Mystery Mode', None),
+    ('Increase Bonus X', None),
+    ('Increase Bonus X', None),
+    ('Call For Backup', None),
+    ('Call For Backup', None),
+    ('Collect Standups', 'collect_standups'),
+    ('Collect Standups', 'collect_standups'),
+    ('Collect Standups', 'collect_standups'),
+    ('Collect Standups', 'collect_standups'),
+    ('250,000', None),
+    ('500,000', None),
+    ('1,000,000', None),
+    """
     computer_awards = [
-                       ('Extra Ball Lit', 'computer_light_eb'),
-                       #('Light Explode', 'computer_explode_activated'),
-                       #('Light Explode', 'computer_explode_activated'),
-                       #('Light Explode', 'computer_explode_activated'),
-                       #('Light Explode', 'computer_explode_activated'),
-                       #('Light Explode', 'computer_explode_activated'),
-                       ('3X Car Crash', 'computer_triple_car_crash'),
-                       ('3X Car Crash', 'computer_triple_car_crash'),
-                       ('3X Car Crash', 'computer_triple_car_crash'),
-                       ('2X Retina Scan', 'computer_double_retina_scan'),
-                       ('2X Retina Scan', 'computer_double_retina_scan'),
-                       ('2X Retina Scan', 'computer_double_retina_scan'),
-                       ('Light Arrows', 'computer_light_arrows'),
-                       ('Light Arrows', 'computer_light_arrows'),
-                       ('Light Arrows', 'computer_light_arrows'),
-                       ('Mystery Mode', None),
-                       ('Mystery Mode', None),
-                       ('Mystery Mode', None),
-                       ('Mystery Mode', None),
-                       ('Mystery Mode', None),
-                       #('Increase Bonus X', None),
-                       #('Increase Bonus X', None),
-                       #('Call For Backup', None),
-                       #('Call For Backup', None)
-                       #('Maximize Freezes', 'computer_max_freezes'),
-                       #('Collect Bonus', 'computer_max_freezes'), #FIXME
-                       ('Collect Standups', 'collect_standups'),
-                       ('Collect Standups', 'collect_standups'),
-                       ('Collect Standups', 'collect_standups'),
-                       ('Collect Standups', 'collect_standups'),
-                       ('250,000', None),
-                       ('500,000', None),
-                       ('1,000,000', None)
+                        ('Extra Ball Lit', 'computer_light_eb'),
+                        ('3X Car Crash', 'computer_triple_car_crash'),
+                        ('3X Car Crash', 'computer_triple_car_crash'),
+                        ('3X Car Crash', 'computer_triple_car_crash'),
+                        ('2X Retina Scan', 'computer_double_retina_scan'),
+                        ('2X Retina Scan', 'computer_double_retina_scan'),
+                        ('2X Retina Scan', 'computer_double_retina_scan'),
+                        ('Light Arrows', 'computer_light_arrows'),
+                        ('Light Arrows', 'computer_light_arrows'),
+                        ('Light Arrows', 'computer_light_arrows'),
+                        ('Mystery Mode', None),
+                        ('Increase Bonus X', None),
+                        ('Increase Bonus X', None),
+                        ('Call For Backup', None),
+                        ('Call For Backup', None),
+                        ('Collect Standups', 'collect_standups'),
+                        ('Collect Standups', 'collect_standups'),
+                        ('250,000', None),
+                        ('500,000', None),
+                        ('1,000,000', None),
+                        ('Simon Says',None),
+                        ('Simon Says',None),
+                        ('Simon Says',None),
+                        ('Simon Says',None),
+                        ('Simon Says',None),
+                        ('Simon Says',None),
+                        ('Simon Says',None)
                        ]
     def __init__(self, game):
         super(ComputerMode, self).__init__(game, 11)
@@ -63,6 +85,7 @@ class ComputerMode(DMMode):
         
     def sw_bottomPopper_active_for_200ms(self, sw):
         # Computer award
+        if self.game.simon_says.is_started(): return
         self.logger.info("Bottom Popper Active for 200ms, starting computer mode")
         self.start_award()
         return True
@@ -81,6 +104,7 @@ class ComputerMode(DMMode):
         self.award_in_progress = True
     
     def select_award(self):
+        random.shuffle(self.computer_awards)
         self.award = self.computer_awards[random.randrange(0,len(self.computer_awards) - 1)]
         if self.award[0] == "Light Arrows" and self.game.current_player().light_arrows:
             self.select_award()
@@ -89,6 +113,10 @@ class ComputerMode(DMMode):
             self.select_award()
         
         if self.award[0] == "Extra Ball Lit" and self.game.current_player().extraball_lit:
+            self.select_award()
+        if self.award[0] == "Call For Backup" and self.game.current_player().call_for_backup:
+            self.select_award()
+        if self.award[0] == "Simon Says" and self.game.fortress.is_started():
             self.select_award()
     
     def announce_award(self):
@@ -125,7 +153,7 @@ class ComputerMode(DMMode):
             self.collect_standups(1)
         
         if self.award[0] == "3X Car Crash":
-            pass
+            self.delay('3x_car_crash', event_type=None, delay=1.5, handler=self.award_3x_car_crash)
         
         if self.award[0] == "250,000":
             self.game.score(250000)
@@ -146,11 +174,62 @@ class ComputerMode(DMMode):
             
         if self.award[0] == "2X Retina Scan":
             self.game.score(1500000)
+            self.game.sound.play("retina")
+            
+            base.screenManager.getScreen("score").show_retina()
+            self.delay('retina_show', event_type=None, delay=1, handler=self.show_retina_text)
+            self.delay('retina-hide', event_type=None, delay=3, handler=base.screenManager.getScreen("score").hide_retina)
+        if self.award[0] == "Call For Backup":
+            self.game.current_player().call_for_backup = True
+            base.display_queue.put_nowait(partial(base.screenManager.getScreen("score").update_hud))
+            
+        if self.award[0] == "Simon Says":
+            self.game.current_player().computer_lit = False
+            self.game.modes.add(self.game.simon_says)
+            self.game.modes.remove(self)
+        
+    def award_3x_car_crash(self):
+        self.game.sound.play("tires")
+        if self.game.current_player().car_crashes == 0:
+            self.game.score(3000000 * 3)
+            message = "9,000,000"
+        elif self.game.current_player().car_crashes == 1:
+            self.game.score(6000000 * 3)
+            message = "18,000,000"
+        elif self.game.current_player().car_crashes >= 2:
+            self.game.score(10000000 * 3)
+            message = "30,000,000"
+            
+        base.screenManager.showModalMessage(
+                                            message=message, 
+                                            modal_name="triple_car_crash", 
+                                            fg=(1,1,1,1),
+                                            frame_color=(0,0,0,0),
+                                            blink_speed=0.25,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1),
+                                            scale=(0.2,0.2,0.2),
+                                            time = 4)
+        
+    def show_retina_text(self):
+        base.screenManager.showModalMessage(
+                                            message="1,500,000", 
+                                            modal_name="retina", 
+                                            fg=(1,1,1,1),
+                                            frame_color=(0,0,0,0),
+                                            blink_speed=0.25,
+                                            blink_color=(0,0,0,0),
+                                            bg=(0,0,0,1),
+                                            start_location=(-0.9,0,-0.5),
+                                            scale=(0.1,0.1,0.1),
+                                            time = 2)
+            
     
     def collect_standups(self,num):
         if num <= 5:
             new_num = num + 1
             self.game.base_game_mode.spot_standup()
+            self.game.update_lamps()
             self.delay('spot_standup', event_type=None, delay=0.8, handler=self.collect_standups, param=new_num)
         else:
             self.delay(name='end_computer', event_type=None, delay=1, handler=self.end_computer)

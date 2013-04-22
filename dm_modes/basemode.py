@@ -69,7 +69,7 @@ class BaseMode(DMMode):
         self.quick_freeze_lit = False
         
         self.delay('stop_screensaver', event_type=None, delay=300, handler=self.stop_screensaver)
-        self.current_ef_sound = 0
+        self.current_ef_sound = random.randint(0,4)
     
     
     def stop_screensaver(self):
@@ -85,6 +85,7 @@ class BaseMode(DMMode):
             self.finish_ball()
             self.stop_timer()
             self.game.current_player().timer = 0
+            self.game.current_player().cfb_in_progress = False
             
         for mode in self.game.modes:
             mode.ball_drained()
@@ -94,6 +95,15 @@ class BaseMode(DMMode):
         #self.layer = dmd.AnimatedLayer(frames=anim.frames,hold=False)
         #self.game.sound.play_voice('dont_touch_anything')
         #self.game.sound.play('electricity')
+        self.ball_saved = True
+        
+        if self.game.current_player().cfb_in_progress:
+            self.game.current_player().cfb_in_progress = False
+            self.game.current_player().call_for_backup = False
+            self.game.sound.play("cfb",fade_music=True)
+            base.display_queue.put_nowait(partial(self.screen.update_hud))
+            return
+        
         base.screenManager.showModalMessage(
                                             message="Ball Saved!", 
                                             modal_name="ball_save", 
@@ -106,8 +116,8 @@ class BaseMode(DMMode):
                                             end_location=(0,0,0),
                                             animation='slide',
                                             time = 4)
-        self.ball_saved = True
-        self.game.sound.play('dontmove')
+        
+        self.game.sound.play('dontmove',fade_music=True)
         
             
     def ball_launch_callback(self):
@@ -132,6 +142,7 @@ class BaseMode(DMMode):
         # switches being hit.
         #self.game.ball_search.disable()
         self.cancel_delayed('quick_freeze')
+        self.game.current_player().cfb_in_progress = False
 
     def finish_ball(self):
         #self.game.sound.fadeout_music()
@@ -191,13 +202,13 @@ class BaseMode(DMMode):
     
     
     def sw_leftSlingshot_active(self, sw):
-        self.pause_timer(2)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         self.game.score(230)
         self.game.sound.play("slingshot")
         self.game.coils.ejectFlasher.pulse(60)
         
     def sw_rightSlingshot_active(self, sw):
-        self.pause_timer(2)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         self.game.score(230)
         self.game.sound.play("slingshot")
         self.game.coils.lowerReboundFlasher.pulse(60)
@@ -246,7 +257,7 @@ class BaseMode(DMMode):
             self.game.sound.play("jet")
             self.game.score(510)
         self.game.coils.jetsFlasher.pulse(40)
-        self.pause_timer(3)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         
     def sw_rightJet_active(self, sw):
         self.show_mtl()
@@ -257,7 +268,7 @@ class BaseMode(DMMode):
             self.game.sound.play("jet")
             self.game.score(510)
         self.game.coils.jetsFlasher.pulse(40)
-        self.pause_timer(3)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         
     def sw_bottomJet_active(self, sw):
         self.show_mtl()
@@ -268,7 +279,7 @@ class BaseMode(DMMode):
             self.game.sound.play("jet")
             self.game.score(510)
         self.game.coils.jetsFlasher.pulse(40)
-        self.pause_timer(3)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
     
     def add_acmag_percentage(self):
         # If the player has already completed acmag, ignore it
@@ -308,7 +319,7 @@ class BaseMode(DMMode):
         self.game.coils.ejectFlasher.schedule(schedule=0xaaaaaaaa, cycle_seconds=1, now=True)
         self.delay('retina_eject', event_type=None, delay=3, handler=self.retina_eject)
         self.game.sound.play("retina")
-        
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(2)
         self.screen.show_retina()
         self.delay('retina_show', event_type=None, delay=1, handler=self.show_retina_text, param=not self.game.current_player().retina_scan_ready)
         
@@ -337,10 +348,8 @@ class BaseMode(DMMode):
         self.screen.hide_retina()
         self.game.coils.ejectFlasher.schedule(schedule=0x0000aaaa, cycle_seconds=1, now=True)
         
-    def sw_bottomPopper_active_for_250ms(self, sw):
-        
-        if not self.game.current_player().computer_lit and not self.game.current_player().arrow_subway:
-            base.screenManager.showModalMessage(
+    def add_explode(self):
+        base.screenManager.showModalMessage(
                                                 message = "Explode Lamp Added",
                                                 time = 2.0,
                                                 scale = 0.2,
@@ -351,7 +360,14 @@ class BaseMode(DMMode):
                                                 blink_speed = 0.015,
                                                 blink_color = (0,0,0,1)
                                                 )
-            self.game.explode.add_explode_lamp()
+        self.game.explode.add_explode_lamp()
+        
+    def sw_bottomPopper_active_for_250ms(self, sw):
+        
+        if self.game.simon_says.is_started(): return
+        
+        if not self.game.current_player().computer_lit and not self.game.current_player().arrow_subway:
+            self.add_explode()
         
         if self.game.current_player().arrow_subway:
             self.do_laser_millions()
@@ -373,7 +389,7 @@ class BaseMode(DMMode):
         self.delay('vuk', event_type=None, delay=1, handler=self.game.coils.bottomPopper.pulse, param=50)
         
     def sw_topPopper_active_for_700ms(self, sw):
-        self.pause_timer(3)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         if self.game.current_player().extraball_lit:
             self.game.gi_off()
             self.game.sound.play("extraball")
@@ -386,7 +402,7 @@ class BaseMode(DMMode):
             base.screenManager.showScreen("extraball")
             return
         
-        if self.game.current_player().multiball_lit:
+        if self.game.current_player().multiball_lit and not self.game.simon_says.is_started():
             self.game.modes.add(self.game.fortress)
             return
         
@@ -458,7 +474,14 @@ class BaseMode(DMMode):
                                                repeat=False,
                                                callback=self.game.update_lamps
                                                )
+        
+        elif self.game.current_player().call_for_backup and not self.game.current_player().cfb_in_progress:
+            self.game.ball_save.add(4.0, allow_multiple_saves=False)
+            self.game.current_player().cfb_in_progress = True
+            self.delay('cfb_timeout', event_type=None, delay=4, handler=self.cfb_timeout)
 
+    def cfb_timeout(self):
+        self.game.current_player().cfb_in_progress = False
             
     def sw_shooterLane_active_for_500ms(self, sw):
         if self.ball_saved:
@@ -479,7 +502,8 @@ class BaseMode(DMMode):
         self.game.sound.play("inlane")
         
         if self.game.current_player().access_claw_lit and not self.game.fortress.is_started() \
-            and not self.game.wtsa.is_started():
+            and not self.game.wtsa.is_started() \
+            and not self.game.car_chase.is_started():
             self.game.current_player().claw_lit = True
             self.game.current_player().access_claw_lit = False
             self.game.sound.play("cryo_claw_activated", fade_music=True)
@@ -492,7 +516,7 @@ class BaseMode(DMMode):
             self.light_quick_freeze("slow")
     
     def sw_leftOutlane_active(self, sw):
-        if not self.ball_saved and self.game.trough.num_balls_in_play == 1:
+        if not self.ball_saved and self.game.trough.num_balls_in_play == 1 and not self.game.current_player().call_for_backup:
             self.stop_timer()
             self.game.sound.play_music("drain")
             self.game.bonus_preemptive = True
@@ -501,7 +525,7 @@ class BaseMode(DMMode):
             self.game.bonus_preemptive = False
         
     def sw_rightOutlane_active(self, sw):
-        if not self.ball_saved and self.game.trough.num_balls_in_play == 1:
+        if not self.ball_saved and self.game.trough.num_balls_in_play == 1 and not self.game.current_player().call_for_backup:
             self.stop_timer()
             self.game.sound.play_music("drain")
             self.game.bonus_preemptive = True
@@ -537,7 +561,7 @@ class BaseMode(DMMode):
         
     def sw_centerRamp_active(self, sw):
         self.game.score(2010)
-        self.pause_timer(3)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         if self.game.current_player().arrow_acmag:
             self.do_laser_millions()
             self.game.current_player().arrow_acmag = False
@@ -657,7 +681,7 @@ class BaseMode(DMMode):
         
     def sw_rightRampEnter_active(self, sw):
         if self.ignore_switches["right_ramp"]: return
-        self.pause_timer(2)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         self.ignore_switch("right_ramp")
         self.game.sound.play("ramp_up")
         self.game.coils.rightRampFlasher.schedule(schedule=0x0000dddd, cycle_seconds=1, now=True)
@@ -669,7 +693,7 @@ class BaseMode(DMMode):
         
     def sw_leftRampEnter_active(self, sw):
         if self.ignore_switches["left_ramp"]: return
-        self.pause_timer(2)
+        if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         self.ignore_switch("left_ramp")
         self.game.sound.play("ramp_up")
         self.game.coils.leftRampLwrFlasher.schedule(schedule=0x0000dddd, cycle_seconds=1, now=True)
@@ -682,6 +706,9 @@ class BaseMode(DMMode):
     def sw_enter_active(self, sw):
         self.game.modes.remove(self)
         self.game.modes.add(self.game.service)
+        #if self.game.current_player().call_for_backup and not self.game.current_player().cfb_in_progress:
+        #    self.game.ball_save.add(4.0, allow_multiple_saves=False)
+        #    self.game.current_player().cfb_in_progress = True
         
     def do_laser_millions(self):
         self.game.sound.play("zap")

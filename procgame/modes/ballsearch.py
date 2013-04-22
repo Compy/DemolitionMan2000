@@ -67,10 +67,10 @@ class BallSearch(Mode):
 
 	def perform_search(self, completion_wait_time, completion_handler = None):
 		print "PERFORM_SEARCH"
-		delay = .150
+		delay = .250
 		for coil in self.coils:
 			self.delay(name='ball_search_coil1', event_type=None, delay=delay, handler=self.pop_coil, param=str(coil))
-			delay = delay + .150
+			delay = delay + .250
 		self.delay(name='start_special_handler_modes', event_type=None, delay=delay, handler=self.start_special_handler_modes)
 
 		if (completion_wait_time != 0):

@@ -28,6 +28,10 @@ class CarChaseMode(DMMode):
         self.cancel_all_delayed()
         self.game.close_divertor()
         
+        if self.game.current_player().claw_lit:
+            self.game.current_player().claw_lit = False
+            self.game.current_player().access_claw_lit = True
+        
         if not self.game.acmag.is_started():
             base.screenManager.getScreen("stack").clear_stacks()
         
@@ -160,6 +164,15 @@ class CarChaseMode(DMMode):
         self.ignore_top = True
         self.delay('unignore_top_car', event_type=None, delay=3, handler=self.unignore_top)
     
+        
+    def sw_flipperLwL_closed_for_1s(self, sw):
+        if not self.game.wtsa.is_started():
+            self.game.coils.flipperLwLHold.disable()
+            
+    def sw_flipperLwR_closed_for_1s(self, sw):
+        if not self.game.wtsa.is_started():
+            self.game.coils.flipperLwRHold.disable()
+            
         
     def unignore_bottom(self):
         self.ignore_bottom = False

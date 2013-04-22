@@ -14,8 +14,8 @@ class ComboMode(DMMode):
     BLINK_SLOW = 0xf0f0f0f0
     BLINK_FAST = 0xbbbbbbbb
     
-    COMBO_COMPUTER = [2,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
-    COMBO_EXTRABALL = [15,45]
+    COMBO_COMPUTER = [2,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300]
+    COMBO_EXTRABALL = [15,45,75,125]
     
     LOCATION_SUBWAY = (0.3261,0,-0.4973)
     LOCATION_LEFTRAMP = (-0.27148,0,-0.875)
@@ -42,7 +42,10 @@ class ComboMode(DMMode):
         self.can_blink_right_ramp = True
         self.can_blink_right_loop = True
         
+        self.double_combo = False
         
+    def double_combo_timeout(self):
+        self.double_combo = False
         
     def mode_started(self):
         self.logger.info("Starting combo mode...")
@@ -122,6 +125,8 @@ class ComboMode(DMMode):
         if self.right_combos != ComboLampState.OFF: self.add_combo(self.LOCATION_FREEWAY)
         self.blink_side(ComboLampState.SLOW)
         self.blink_right(ComboLampState.OFF)
+        self.double_combo = True
+        self.delay('double_combo', event_type=None, delay=4, handler=self.double_combo_timeout)
         
     def sw_leftInlane_active(self, sw):
         self.blink_right(ComboLampState.SLOW)
@@ -211,6 +216,26 @@ class ComboMode(DMMode):
                                             blink_color = (1,1,1,1))
         
         self.game.sound.play("flyby")
+        
+        if self.double_combo:
+            self.double_combo = False
+            self.add_combo(position)
+            self.cancel_delayed('double_combo')
+            
+            base.screenManager.showModalMessage(
+                                                message = "DOUBLE COMBO",
+                                                time = 2.0,
+                                                font = "motorwerk.ttf",
+                                                scale = 0.1,
+                                                bg=(0,0,0,1),
+                                                fg=(1,1,1,1),
+                                                frame_color=((208/255),(27/255),(224/255),1),
+                                                blink_speed = 0.5,
+                                                blink_color = (0,0,0,1),
+                                                #l r t b
+                                                frame_margin = (0.1,0.25,0,0),
+                                                start_location = (-1,0,0.8)
+                                                )
                                             
     
     

@@ -32,9 +32,12 @@ class SoundController(object):
         
         self.lower_music()
         self.boost_music()
+        self.current_music_key = ""
 
 
     def play_music(self, key, loops, start_time):
+        if key == self.current_music_key: return
+        self.current_music_key = key
         self.stop_music()
         self.logger.info("Play Music %s %s %s" % (str(key), str(loops), str(start_time)))
         sound_file = None
