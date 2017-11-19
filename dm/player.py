@@ -140,3 +140,6 @@ class DMPlayer(game.Player):
         self.explode_rightramp = False
         self.explode_rightloop = False
         
+        self.tilt_warnings = 0
+        self.tilted = False
+        

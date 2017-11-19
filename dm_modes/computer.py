@@ -36,26 +36,31 @@ class ComputerMode(DMMode):
     ('1,000,000', None),
     """
     computer_awards = [
-                        ('Extra Ball Lit', 'computer_light_eb'),
-                        ('3X Car Crash', 'computer_triple_car_crash'),
-                        ('3X Car Crash', 'computer_triple_car_crash'),
-                        ('3X Car Crash', 'computer_triple_car_crash'),
-                        ('2X Retina Scan', 'computer_double_retina_scan'),
-                        ('2X Retina Scan', 'computer_double_retina_scan'),
-                        ('2X Retina Scan', 'computer_double_retina_scan'),
-                        ('Light Arrows', 'computer_light_arrows'),
-                        ('Light Arrows', 'computer_light_arrows'),
-                        ('Light Arrows', 'computer_light_arrows'),
-                        ('Mystery Mode', None),
-                        ('Increase Bonus X', None),
-                        ('Increase Bonus X', None),
-                        ('Call For Backup', None),
-                        ('Call For Backup', None),
-                        ('Collect Standups', 'collect_standups'),
-                        ('Collect Standups', 'collect_standups'),
-                        ('250,000', None),
-                        ('500,000', None),
-                        ('1,000,000', None),
+                        #('Extra Ball Lit', 'computer_light_eb'),
+                        #('3X Car Crash', 'computer_triple_car_crash'),
+                        #('3X Car Crash', 'computer_triple_car_crash'),
+                        #('3X Car Crash', 'computer_triple_car_crash'),
+                        #('2X Retina Scan', 'computer_double_retina_scan'),
+                        #('2X Retina Scan', 'computer_double_retina_scan'),
+                        #('2X Retina Scan', 'computer_double_retina_scan'),
+                        #('Light Arrows', 'computer_light_arrows'),
+                        #('Light Arrows', 'computer_light_arrows'),
+                        #('Light Arrows', 'computer_light_arrows'),
+                        #('Mystery Mode', None),
+                        #('Mystery Mode', None),
+                        #('Mystery Mode', None),
+                        #('Mystery Mode', None),
+                        #('Mystery Mode', None),
+                        #('Mystery Mode', None),
+                        #('Increase Bonus X', None),
+                        #('Increase Bonus X', None),
+                        #('Call For Backup', None),
+                        #('Call For Backup', None),
+                        #('Collect Standups', 'collect_standups'),
+                        #('Collect Standups', 'collect_standups'),
+                        #('250,000', None),
+                        #('500,000', None),
+                        #('1,000,000', None),
                         ('Simon Says',None),
                         ('Simon Says',None),
                         ('Simon Says',None),
@@ -176,9 +181,9 @@ class ComputerMode(DMMode):
             self.game.score(1500000)
             self.game.sound.play("retina")
             
-            base.screenManager.getScreen("score").show_retina()
+            self.game.base_game_mode.show_retina()
             self.delay('retina_show', event_type=None, delay=1, handler=self.show_retina_text)
-            self.delay('retina-hide', event_type=None, delay=3, handler=base.screenManager.getScreen("score").hide_retina)
+            
         if self.award[0] == "Call For Backup":
             self.game.current_player().call_for_backup = True
             base.display_queue.put_nowait(partial(base.screenManager.getScreen("score").update_hud))

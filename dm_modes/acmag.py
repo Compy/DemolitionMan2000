@@ -53,11 +53,13 @@ class AcmagMode(DMMode):
             self.game.current_player().acmag_percentage = 10
             
         base.screenManager.hideScreen("acmag")
+        base.screenManager.hideScreen("stack")
             
     def ball_drained(self):
         if self.game.trough.num_balls_in_play > 0: return
         self.cancel_delayed('acmag_blink_score')
         base.screenManager.hideScreen("acmag")
+        base.screenManager.hideScreen("stack")
         
     def timeout(self):
         self.logger.info("ACMAG timeout")
@@ -68,6 +70,7 @@ class AcmagMode(DMMode):
             self.game.play_music()
             
         base.screenManager.hideScreen("acmag")
+        base.screenManager.hideScreen("stack")
         
         
     def toggle_score_color(self):

@@ -74,7 +74,7 @@ class CarChaseMode(DMMode):
             self.game.dim_lower_pf()
             self.mode_completing = True
             self.game.base_game_mode.pause_timer()
-            self.delay('explode_lamps', event_type=None, delay=6.5, handler=self.explode_lamps)
+            self.delay('explode_lamps', event_type=None, delay=6, handler=self.explode_lamps)
             self.delay('show_award', event_type=None, delay=7.6, handler=self.show_award)
             self.game.current_player().car_chase = True
             base.screenManager.showScreen("carchase")

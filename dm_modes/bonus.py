@@ -17,7 +17,7 @@ class BonusMode(DMMode):
         #self.skillshot_screen = base.screenManager.getScreen("skillshot")
         self.game.close_divertor()
         self.game.dim_lower_pf()
-        if not self.game.bonus_preemptive:
+        if not self.game.bonus_preemptive and not self.game.current_player().tilted:
             self.game.sound.play_music("ball_end")
         else:
             self.game.bonus_preemptive = False
@@ -27,36 +27,43 @@ class BonusMode(DMMode):
         
     def calculate_bonus_items(self):
         self.bonus_screen.clear_bonus_items()
-        self.bonus_screen.add_bonus_item("Headshots", 15, True)
-        self.bonus_screen.add_bonus_item("Ricochets", 24, True)
-        self.bonus_screen.add_bonus_item("Explosions", self.game.current_player().explosions, True)
-        if self.game.current_player().player_stats['combos'] > 0:
-            self.bonus_screen.add_bonus_item("Combos", self.game.current_player().player_stats['combos'], True)
-        
-        if self.game.current_player().bonus_x > 1:
-            self.bonus_screen.add_bonus_item("Multiplier", self.game.current_player().bonus_x, True)
+        if not self.game.current_player().tilted:
+            self.bonus_screen.add_bonus_item("Headshots", 15, True)
+            self.bonus_screen.add_bonus_item("Ricochets", 24, True)
+            self.bonus_screen.add_bonus_item("Explosions", self.game.current_player().explosions, True)
+            if self.game.current_player().player_stats['combos'] > 0:
+                self.bonus_screen.add_bonus_item("Combos", self.game.current_player().player_stats['combos'], True)
             
-        total = self.game.current_player().player_stats['combos'] * 250000
-        total += self.game.current_player().explosions * 40000
-        total = total * self.game.current_player().bonus_x
+            if self.game.current_player().bonus_x > 1:
+                self.bonus_screen.add_bonus_item("Multiplier", self.game.current_player().bonus_x, True)
+                
+            total = self.game.current_player().player_stats['combos'] * 250000
+            total += self.game.current_player().explosions * 40000
+            total = total * self.game.current_player().bonus_x
+            
+            self.total = total
+            
+            
+            self.bonus_screen.add_bonus_item("Total", total, True)
+            base.screenManager.showScreen("bonus", False)
+            self.bonus_screen.start_animation()
         
-        self.total = total
-        
-        
-        self.bonus_screen.add_bonus_item("Total", total, True)
-        base.screenManager.showScreen("bonus", False)
-        self.bonus_screen.start_animation()
         self.game.current_player().explosions = 0
         self.game.current_player().bonus_x = 1
     
     def mode_stopped(self):
         self.logger.info("Bonus mode complete")
+        self.game.current_player().tilted = False
+        self.game.current_player().tilt_warnings = 0
         self.game.base_game_mode.end_ball()
         base.screenManager.hideScreen("bonus")
         
     def end_bonus(self):
-        self.game.score(self.total)
-        self.game.sound.play("bonus_total")
+        if not self.game.current_player().tilted:
+            self.game.score(self.total)
+            self.game.sound.play("bonus_total")
+            self.game.current_player().tilted = False
+            self.game.current_player().tilt_warnings = 0
         self.delay(name='end_bonus', event_type=None, delay=1.5, handler=self.start_next_ball)
         
     def start_next_ball(self):

@@ -13,7 +13,7 @@ Python 2.7 is also required
 
 Assets
 -------------------
-Assets (game sounds, music, etc) are owned by WMS Industries, Planetary Pinball and Warner Bros. As such, I cannot host them here. If you own the game already, assets can be provided legally. Contact me for details.
+Assets (game sounds, music, etc) are owned by WMS Industries, Planetary Pinball and Warner Bros. As such, I cannot host them.
 
 Special Thanks
 -------------------

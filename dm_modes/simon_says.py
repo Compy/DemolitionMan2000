@@ -134,7 +134,9 @@ class SimonSays(DMMode):
         self.game.sound.play_music("simon_r2",-1)
         
     def start_r2(self):
+        self.screen.hide_award()
         self.screen.hide_instructions2()
+        self.cancel_delayed('dec_award')
         self.screen.show_color("off")
         self.generate_move_list(self.num_hits)
         self.game.sound.play("simon_says", fade_music=True)

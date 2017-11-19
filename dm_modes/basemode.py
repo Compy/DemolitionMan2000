@@ -19,6 +19,7 @@ class BaseMode(DMMode):
         self.ignore_switches['left_ramp'] = False
         self.mtl_shown = False
         self.quick_freeze_lit = False
+        self.tilt_debounce = False
         
         self.retina_scan_active = [0,1,2,4,7,10,13,16,19,21,24,27,30,33,36,39,41,44,47,50]
         
@@ -70,6 +71,8 @@ class BaseMode(DMMode):
         
         self.delay('stop_screensaver', event_type=None, delay=300, handler=self.stop_screensaver)
         self.current_ef_sound = random.randint(0,4)
+        self.game.lamps.start.pulse(0)
+        self.tilt_debounce = False
     
     
     def stop_screensaver(self):
@@ -202,12 +205,15 @@ class BaseMode(DMMode):
     
     
     def sw_leftSlingshot_active(self, sw):
+        if self.game.current_player().tilted: return
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         self.game.score(230)
         self.game.sound.play("slingshot")
         self.game.coils.ejectFlasher.pulse(60)
         
     def sw_rightSlingshot_active(self, sw):
+        
+        if self.game.current_player().tilted: return
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         self.game.score(230)
         self.game.sound.play("slingshot")
@@ -226,6 +232,7 @@ class BaseMode(DMMode):
         self.show_mtl(False)
         
     def sw_rightHandle_active(self, sw):
+        if self.game.current_player().tilted: return
         self.sw_flipperLwR_active(sw)
         
     def sw_flipperLwR_closed_for_3s(self, sw):
@@ -248,6 +255,7 @@ class BaseMode(DMMode):
             self.game.sound.play("computer_superjets_complete",fade_music=True)
             
     def sw_leftJet_active(self, sw):
+        if self.game.current_player().tilted: return
         self.show_mtl()
         self.add_acmag_percentage()
         
@@ -260,6 +268,7 @@ class BaseMode(DMMode):
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         
     def sw_rightJet_active(self, sw):
+        if self.game.current_player().tilted: return
         self.show_mtl()
         self.add_acmag_percentage()
         if self.game.current_player().super_jets:
@@ -271,6 +280,7 @@ class BaseMode(DMMode):
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         
     def sw_bottomJet_active(self, sw):
+        if self.game.current_player().tilted: return
         self.show_mtl()
         self.add_acmag_percentage()
         if self.game.current_player().super_jets:
@@ -297,12 +307,17 @@ class BaseMode(DMMode):
             self.game.modes.add(self.game.acmag)
     
     def sw_startButton_active(self, sw):
+        if self.game.current_player().tilted: return
         if self.game.ball == 1:
             p = self.game.add_player()
             if p != False:
                 base.screenManager.showModalMessage(message=p.name + " added", modal_name="player_add", bg=(0,0,1,1), time = 2)
             
     def sw_eject_active_for_100ms(self, sw):
+        if self.game.current_player().tilted:
+            self.game.coils.eject.pulse()
+            return
+        
         self.game.current_player().retina_scans += 1
         if not self.game.current_player().retina_scan_ready:
             if self.game.current_player().retina_scans in self.retina_scan_active:
@@ -322,6 +337,13 @@ class BaseMode(DMMode):
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(2)
         self.screen.show_retina()
         self.delay('retina_show', event_type=None, delay=1, handler=self.show_retina_text, param=not self.game.current_player().retina_scan_ready)
+        
+    def show_retina(self):
+        self.screen.show_retina()
+        self.delay('retina_hide', event_type=None, delay=3, handler=self.hide_retina)
+        
+    def hide_retina(self):
+        self.screen.hide_retina()
         
     def show_retina_text(self, is_accepted = False):
         if is_accepted:
@@ -364,6 +386,10 @@ class BaseMode(DMMode):
         
     def sw_bottomPopper_active_for_250ms(self, sw):
         
+        if self.game.current_player().tilted:
+            self.game.coils.bottomPopper.pulse(30)
+            return
+        
         if self.game.simon_says.is_started(): return
         
         if not self.game.current_player().computer_lit and not self.game.current_player().arrow_subway:
@@ -389,6 +415,10 @@ class BaseMode(DMMode):
         self.delay('vuk', event_type=None, delay=1, handler=self.game.coils.bottomPopper.pulse, param=50)
         
     def sw_topPopper_active_for_700ms(self, sw):
+        if self.game.current_player().tilted:
+            self.game.coils.topPopper.pulse(30)
+            return
+        
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         if self.game.current_player().extraball_lit:
             self.game.gi_off()
@@ -499,6 +529,7 @@ class BaseMode(DMMode):
             self.game.ball_save.start(num_balls_to_save=1, time=10, now=True, allow_multiple_saves=False)
             
     def sw_leftInlane_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.sound.play("inlane")
         
         if self.game.current_player().access_claw_lit and not self.game.fortress.is_started() \
@@ -511,11 +542,14 @@ class BaseMode(DMMode):
             self.update_lamps()
         
     def sw_rightInlane_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.sound.play("inlane")
         if self.game.current_player().quick_freeze:
             self.light_quick_freeze("slow")
     
     def sw_leftOutlane_active(self, sw):
+        if self.game.current_player().tilted: return
+        
         if not self.ball_saved and self.game.trough.num_balls_in_play == 1 and not self.game.current_player().call_for_backup:
             self.stop_timer()
             self.game.sound.play_music("drain")
@@ -525,6 +559,7 @@ class BaseMode(DMMode):
             self.game.bonus_preemptive = False
         
     def sw_rightOutlane_active(self, sw):
+        if self.game.current_player().tilted: return
         if not self.ball_saved and self.game.trough.num_balls_in_play == 1 and not self.game.current_player().call_for_backup:
             self.stop_timer()
             self.game.sound.play_music("drain")
@@ -560,6 +595,7 @@ class BaseMode(DMMode):
             self.game.current_player().timer = max_time
         
     def sw_centerRamp_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.score(2010)
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         if self.game.current_player().arrow_acmag:
@@ -576,6 +612,7 @@ class BaseMode(DMMode):
                                            )
         self.show_mtl()
     def sw_leftLoop_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.score(600)
         self.pause_timer(2)
         if self.game.current_player().arrow_left_loop:
@@ -584,6 +621,7 @@ class BaseMode(DMMode):
             self.game.lamps.leftLoopArrow.disable()
             
     def sw_leftRampExit_active(self, sw):
+        if self.game.current_player().tilted: return
         if self.game.current_player().arrow_left_ramp:
             self.do_laser_millions()
             self.game.current_player().arrow_left_ramp = False
@@ -621,6 +659,7 @@ class BaseMode(DMMode):
         self.update_lamps()
         
     def sw_upperLeftFlipperGate_active(self, sw):
+        if self.game.current_player().tilted: return
         self.screen.spin_spinner()
         self.game.sound.play_delayed(key = "spinner", loops = 20, delay = 0.05, callback = partial(self.game.score, 1000))
         self.delay('spinner_sound', event_type=None, delay=1.3, handler=self.play_spinner_sound, param=2)
@@ -631,6 +670,7 @@ class BaseMode(DMMode):
             self.game.sound.play_delayed(key = "spinner", loops = 5, delay = 0.25, callback = partial(self.game.score, 1000))
         
     def sw_sideRampExit_active(self, sw):
+        if self.game.current_player().tilted: return
         if self.game.current_player().arrow_side_ramp:
             self.do_laser_millions()
             self.game.current_player().arrow_side_ramp = False
@@ -659,6 +699,7 @@ class BaseMode(DMMode):
         
             
     def sw_rightRampExit_active(self, sw):
+        if self.game.current_player().tilted: return
         if self.game.current_player().arrow_right_ramp:
             self.do_laser_millions()
             self.game.current_player().arrow_right_ramp = False
@@ -668,6 +709,7 @@ class BaseMode(DMMode):
             self.game.score(2500)
         
     def sw_rightFreeway_active(self, sw):
+        if self.game.current_player().tilted: return
         self.pause_timer(3)
         if self.game.current_player().arrow_right_loop:
             self.do_laser_millions()
@@ -680,6 +722,7 @@ class BaseMode(DMMode):
         self.game.score(2500)
         
     def sw_rightRampEnter_active(self, sw):
+        if self.game.current_player().tilted: return
         if self.ignore_switches["right_ramp"]: return
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         self.ignore_switch("right_ramp")
@@ -692,6 +735,8 @@ class BaseMode(DMMode):
                                            )
         
     def sw_leftRampEnter_active(self, sw):
+        if self.game.current_player().tilted: return
+        
         if self.ignore_switches["left_ramp"]: return
         if self.game.trough.num_balls_in_play == 1: self.pause_timer(3)
         self.ignore_switch("left_ramp")
@@ -716,18 +761,22 @@ class BaseMode(DMMode):
         self.screen.show_laser_millions()
         
     def sw_mtlM_active(self, sw):
+        if self.game.current_player().tilted: return
         self.pause_timer(3)
         self.game.current_player().mlit = True
         self.show_mtl()
         self.game.sound.play("mtl_whoosh")
     
     def sw_mtlT_active(self, sw):
+        if self.game.current_player().tilted: return
         self.pause_timer(3)
         self.game.current_player().tlit = True
         self.show_mtl()
         self.game.sound.play("mtl_whoosh")
     
     def sw_mtlL_active(self, sw):
+        if self.game.current_player().tilted: return
+        if self.game.current_player().tilted: return
         self.pause_timer(3)
         self.game.current_player().llit = True
         self.show_mtl()
@@ -774,6 +823,7 @@ class BaseMode(DMMode):
                                             time = 2)
         
     def sw_standUp1_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.lamps.standup1.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_1', delay=1, handler=self.game.lamps.standup1.pulse, param=0)
         self.game.sound.play("standup")
@@ -788,6 +838,7 @@ class BaseMode(DMMode):
             self.game.current_player().super_jets_left += 1
     
     def sw_standUp2_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.lamps.standup2.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_2', delay=1, handler=self.game.lamps.standup2.pulse, param=0)
         self.game.sound.play("standup")
@@ -802,6 +853,7 @@ class BaseMode(DMMode):
             self.game.current_player().super_jets_left += 1
     
     def sw_standUp3_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.lamps.standup3.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_3', delay=1, handler=self.game.lamps.standup3.pulse, param=0)
         self.game.sound.play("standup")
@@ -816,6 +868,7 @@ class BaseMode(DMMode):
             self.game.current_player().super_jets_left += 1
     
     def sw_standUp4_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.lamps.standup4.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_4', delay=1, handler=self.game.lamps.standup4.pulse, param=0)
         self.game.sound.play("standup")
@@ -830,6 +883,7 @@ class BaseMode(DMMode):
             self.game.current_player().super_jets_left += 1
         
     def sw_eyeballStandup_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.current_player().retina_value += 5000030
         self.game.current_player().retina_scan_ready = True
         self.game.coils.eyeBallFlasher.schedule(schedule=0x0000aaaa, cycle_seconds=1, now=True)
@@ -838,6 +892,7 @@ class BaseMode(DMMode):
         
     
     def sw_standUp5_active(self, sw):
+        if self.game.current_player().tilted: return
         self.game.lamps.standup5.schedule(schedule=0x55555555, cycle_seconds=1, now=True)
         self.delay('standup_5', delay=1, handler=self.game.lamps.standup5.pulse, param=0)
         self.game.sound.play("standup")
@@ -850,6 +905,59 @@ class BaseMode(DMMode):
         
         if self.game.current_player().super_jets:
             self.game.current_player().super_jets_left += 1
+    
+    def debounce_tilt(self):
+        self.tilt_debounce = False
+    
+    def sw_plumbBobTilt_active(self, sw):
+        if self.game.current_player().tilted or self.tilt_debounce or self.game.switches.shooterLane.is_active(): return
+        self.game.current_player().tilt_warnings += 1
+        
+        self.tilt_debounce = True
+        self.delay('tilt_debounce', event_type=None, delay=2, handler=self.debounce_tilt)
+        
+        msg = "WARNING!!"
+        time = 1.5
+        speed = 0.030
+        
+        if self.game.current_player().tilt_warnings == 1:
+            self.game.gi_off()
+            self.delay('gi_on', event_type=None, delay=0.2, handler=self.game.gi_on)
+        if self.game.current_player().tilt_warnings == 2:
+            msg = msg + "\nWARNING!!"
+            self.delay('gi_on', event_type=None, delay=0.2, handler=self.game.gi_on)
+        
+        self.game.sound.play("alarm",fade_music=True)
+        
+        if self.game.current_player().tilt_warnings >= 3:
+            msg = "TILT"
+            time = 5
+            self.pause_timer(10)
+            self.game.enable_flippers(False)
+            self.cancel_delayed('gi_on')
+            self.game.gi_off()
+            self.game.sound.stop_music()
+            self.game.current_player().tilted = True
+            self.game.ball_save.disable()
+            speed = 0.5
+            
+            for lamp in self.game.lamps:
+                lamp.disable()
+            
+        base.screenManager.showModalMessage(
+                                            message=msg, 
+                                            modal_name="tilt",
+                                            font = "motorwerk.ttf",
+                                            fg=(1,1,1,1),
+                                            frame_color=(1,0,0,1),
+                                            blink_speed=speed,
+                                            blink_color=(0,0,0,0),
+                                            bg=(1,0,0,1), 
+                                            time = time)
+            
+    def sw_slamTilt_active(self, sw):
+        self.game.exit_code = -13
+        self.game.exit = True
         
     def check_standups(self):
         if self.game.current_player().standup1 and \
@@ -886,6 +994,7 @@ class BaseMode(DMMode):
     def update_lamps(self):
         
         self.game.restore_player_feature_lamps()
+        self.game.lamps.start.pulse(0)
         
         if self.game.current_player().extra_balls > 0:
             self.game.lamps.shootAgain.pulse(0)

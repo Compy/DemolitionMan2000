@@ -41,6 +41,8 @@ class AttractMode(DMMode):
         self.rotate_screens()
         self.game.gi_on()
         self.game.lampController.play_show("random", repeat=True)
+        self.game.enable_flippers(False)
+        self.game.lamps.start.schedule(schedule=0xFF00FF00, cycle_seconds=0, now=True)
     
     def mode_stopped(self):
         self.logger.info("Stopping attract mode")
@@ -147,3 +149,9 @@ class AttractMode(DMMode):
     def end_outtro(self):
         self.game.gi_on()
         self.game.lampController.play_show("random", repeat=True)
+        
+    def sw_flipperLwR_active(self, sw):
+        self.rotate_screens()
+        
+    def sw_flipperLwL_active(self, sw):
+        self.rotate_screens()
